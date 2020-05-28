@@ -34,15 +34,20 @@ module.exports = (RED) => {
         }
         node.on('input', async (msg) => {
             const { url, data } = msg.payload;
-            if (lodash_1.isEmpty(data)) {
-                msg.payload = await api.get(url).catch((e) => {
-                    node.error(`Error Requesting: ${JSON.stringify(e)}`);
-                });
+            try {
+                if (lodash_1.isEmpty(data)) {
+                    msg.payload = await api.get(url).catch((e) => {
+                        node.error(`Error Requesting: ${JSON.stringify(e)}`);
+                    });
+                }
+                else {
+                    msg.payload = await api.post(url, data).catch((e) => {
+                        node.error(`Error Requesting: ${JSON.stringify(e)}`);
+                    });
+                }
             }
-            else {
-                msg.payload = await api.post(url, data).catch((e) => {
-                    node.error(`Error Requesting: ${JSON.stringify(e)}`);
-                });
+            catch (e) {
+                node.error(`Error Requesting: ${JSON.stringify(e)}`);
             }
             return node.send(msg);
         });
