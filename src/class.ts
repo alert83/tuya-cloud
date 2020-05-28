@@ -44,7 +44,6 @@ export class TuyaApi {
             headers: {
                 client_id: this._clientId,
                 sign_method: 'HMAC-SHA256',
-                'Content-Type': 'application/json',
             },
             hooks: {
                 beforeRequest: [async options => {
