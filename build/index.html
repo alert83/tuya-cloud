@@ -4,7 +4,7 @@
         color: '#a6bbcf',
         defaults: {
             name: {value: "Tuya Cloud API Configuration"},
-            key: {value: "", required: true},
+            clientId: {value: "", required: true},
             secret: {value: "", required: true},
             region: {value: "EU", required: true},
             schema: {value: "", required: true},
@@ -36,14 +36,17 @@
       <label for="node-config-input-name"><i class="icon-tag"></i> Name</label>
       <input type="text" id="node-config-input-name" placeholder="Name">
   </div>
+
   <div class="form-row">
-      <label for="node-config-input-key"><i class="fa fa-key"></i> Key</label>
-      <input type="text" id="node-config-input-key" placeholder="Key">
+      <label for="node-config-input-clientId"><i class="fa fa-key"></i> Client Id</label>
+      <input type="text" id="node-config-input-clientId" placeholder="Client Id">
   </div>
+
   <div class="form-row">
     <label for="node-config-input-secret"><i class="fa fa-user-secret"></i> Secret</label>
-    <input type="text" id="node-config-input-secret" placeholder="Secret">
+    <input type="password" id="node-config-input-secret" placeholder="Secret">
   </div>
+
   <div class="form-row">
     <label for="node-config-input-region"><i class="icon-flag"></i> Region</label>
     <select id="node-config-input-region">
@@ -52,6 +55,7 @@
       <option value="EU">Europe</option>
     </select>
   </div>
+
   <div class="form-row">
     <label for="node-config-input-schema"><i class="fa fa-schema"></i> Schema</label>
     <input type="text" id="node-config-input-schema" placeholder="Schema">
@@ -65,10 +69,10 @@
   <dl class="message-properties">
     <dt>Name</dt>
     <dd> Description of the configuration set </dd>
-    <dt>Key</dt>
-    <dd> API Key Id</a></dd>
+    <dt>Client Id</dt>
+    <dd> Project API Client Id</a></dd>
     <dt>Secret</dt>
-    <dd> API Secret</a></dd>
+    <dd> Project API Secret</a></dd>
     <dt>Region</dt>
     <dd> Select the region for the account registered with TuyaSmart (Asia/America/Europe).</dd>
     <dt>Schema</dt>

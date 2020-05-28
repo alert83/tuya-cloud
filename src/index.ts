@@ -2,20 +2,13 @@ module.exports = (RED) => {
     function configuration(config) {
         RED.nodes.createNode(this, config);
         this.name = config.name;
-
-        this.clientId = this.credentials.clientId;
-        this.secret = this.credentials.secret;
-
+        this.clientId = config.clientId;
+        this.secret = config.secret;
         this.region = config.region;
         this.schema = config.schema;
     }
 
-    RED.nodes.registerType('tuya-cloud-api-configuration', configuration, {
-        credentials: {
-            clientId: {type: "text"},
-            secret: {type: "password"}
-        }
-    });
+    RED.nodes.registerType('tuya-cloud-api-configuration', configuration);
 
     //
 
