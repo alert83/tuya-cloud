@@ -1,7 +1,7 @@
 <script type="text/javascript">
     RED.nodes.registerType('tuya-cloud-api-configuration', {
         category: 'config',
-        color: '#b13c09',
+        color: '#FE4A1C',
         defaults: {
             name: {value: "Tuya Cloud API Configuration"},
             clientId: {value: "", required: true},
@@ -17,8 +17,8 @@
     });
 
     RED.nodes.registerType('tuya-cloud-api-request', {
-        category: 'function',
-        color: '#b13c09',
+        category: 'network',
+        color: '#FE4A1C',
         defaults: {
             name: {value: "Tuya Cloud API Request"},
             config: {value: "", type: "tuya-cloud-api-configuration"},
