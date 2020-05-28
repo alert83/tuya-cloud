@@ -17,6 +17,12 @@ export declare class TuyaApi {
     });
     private buildClient;
     isTokenExpired(): boolean;
+    setTokenObject(tokenAccess: any, tokenRefresh: any, tokenExpiresAt: any): void;
+    getTokenObject(): {
+        tokenAccess: string;
+        tokenRefresh: string;
+        tokenExpiresAt: string;
+    };
     getToken(): Promise<void>;
     refreshToken(): Promise<void>;
     get(uri: any): Promise<unknown>;

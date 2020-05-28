@@ -69,6 +69,18 @@ class TuyaApi {
     isTokenExpired() {
         return new Date().getTime() > this.tokenExpiresAt.getTime();
     }
+    setTokenObject(tokenAccess, tokenRefresh, tokenExpiresAt) {
+        this.tokenAccess = tokenAccess;
+        this.tokenRefresh = tokenRefresh;
+        this.tokenExpiresAt = new Date(tokenExpiresAt);
+    }
+    getTokenObject() {
+        return {
+            tokenAccess: this.tokenAccess,
+            tokenRefresh: this.tokenRefresh,
+            tokenExpiresAt: this.tokenExpiresAt.toISOString(),
+        };
+    }
     async getToken() {
         const { result: { access_token, refresh_token, expire_time } } = await this._client
             .get('token?grant_type=1')

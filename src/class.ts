@@ -95,6 +95,20 @@ export class TuyaApi {
         return new Date().getTime() > this.tokenExpiresAt.getTime();
     }
 
+    setTokenObject(tokenAccess, tokenRefresh, tokenExpiresAt) {
+        this.tokenAccess = tokenAccess;
+        this.tokenRefresh = tokenRefresh;
+        this.tokenExpiresAt = new Date(tokenExpiresAt);
+    }
+
+    getTokenObject() {
+        return {
+            tokenAccess: this.tokenAccess,
+            tokenRefresh: this.tokenRefresh,
+            tokenExpiresAt: this.tokenExpiresAt.toISOString(),
+        }
+    }
+
     async getToken() {
         // if (this.handleToken) {
         //     throw new HandleTokenError();

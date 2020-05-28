@@ -1,13 +1,14 @@
 <script type="text/javascript">
     RED.nodes.registerType('tuya-cloud-api-configuration', {
         category: 'config',
-        color: '#a6bbcf',
+        color: '#b13c09',
         defaults: {
             name: {value: "Tuya Cloud API Configuration"},
             clientId: {value: "", required: true},
             secret: {value: "", required: true},
             region: {value: "EU", required: true},
             schema: {value: "", required: true},
+            storeKey: {value: "", required: true},
         },
         icon: "white-globe.png",
         label: function () {
@@ -17,7 +18,7 @@
 
     RED.nodes.registerType('tuya-cloud-api-request', {
         category: 'function',
-        color: '#a6bbcf',
+        color: '#b13c09',
         defaults: {
             name: {value: "Tuya Cloud API Request"},
             config: {value: "", type: "tuya-cloud-api-configuration"},
@@ -61,6 +62,11 @@
     <input type="text" id="node-config-input-schema" placeholder="Schema">
   </div>
 
+  <div class="form-row">
+    <label for="node-config-input-storeKey"><i class="fa fa-schema"></i> Store Key</label>
+    <input type="text" id="node-config-input-storeKey" placeholder="Store Key">
+  </div>
+
 </script>
 
 <script type="text/x-red" data-help-name="tuya-cloud-api-configuration">
@@ -69,14 +75,21 @@
   <dl class="message-properties">
     <dt>Name</dt>
     <dd> Description of the configuration set </dd>
+
     <dt>Client Id</dt>
     <dd> Project API Client Id</a></dd>
+
     <dt>Secret</dt>
     <dd> Project API Secret</a></dd>
+
     <dt>Region</dt>
     <dd> Select the region for the account registered with TuyaSmart (Asia/America/Europe).</dd>
+
     <dt>Schema</dt>
     <dd> Tuya SDK Schema</dd>
+
+    <dt>Store Key</dt>
+    <dd> Store Key for access tokens</dd>
   </dl>
 
 </script>
@@ -95,16 +108,18 @@
   <p>Tuya API Cloud Request</p>
   <h3>Inputs</h3>
   <dl class="message-properties">
-    <dt>payload
-      <span class="property-type">object</span>
-    </dt>
+    <dt>payload<span class="property-type">object</span></dt>
     <dd> Payload object consisting of the various properties: </dd>
+
     <dt>payload.action <span class="property-type">string</span></dt>
     <dd> API action to invoke (for example, 'tuya.cloud.device.token.create') (see <a href="https://docs.tuya.com/en/cloudapi/appAPI/index.html">docs</a> for action list).</dd>
+
     <dt class="optional">payload.group <span class="property-type">string</span></dt>
     <dd> Group ID URL GET param</dd>
+
     <dt class="optional">payload.data <span class="property-type">object</span></dt>
     <dd> data to send in the request body</dd>
+
     <dt class="optional">payload.requireSID <span class="property-type">boolean</span></dt>
     <dd> Send Session ID with the API request <code>[Default: true]</code></dd>
   </dl>
