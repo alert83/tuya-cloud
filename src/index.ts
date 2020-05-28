@@ -45,15 +45,15 @@ module.exports = (RED) => {
             try {
                 if (isEmpty(data)) {
                     msg.payload = await api.get(url).catch((e) => {
-                        node.error(`Error Get Requesting: ${JSON.stringify(e)}`);
+                        node.error(`Error Get Requesting: ${JSON.stringify(e.message)}`);
                     });
                 } else {
                     msg.payload = await api.post(url, data).catch((e) => {
-                        node.error(`Error Post Requesting: ${JSON.stringify(e)}`);
+                        node.error(`Error Post Requesting: ${JSON.stringify(e.message)}`);
                     });
                 }
             } catch (e) {
-                node.error(`Error Requesting: ${JSON.stringify(e)}`);
+                node.error(`Error Requesting: ${JSON.stringify(e.message)}`);
             }
 
             return node.send(msg);
