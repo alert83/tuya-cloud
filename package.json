@@ -1,6 +1,6 @@
 {
   "name": "node-red-contrib-tuya-cloud-api",
-  "version": "1.1.1",
+  "version": "1.2.0",
   "description": "",
   "main": "build/",
   "scripts": {
@@ -29,6 +29,7 @@
     "version-changelog": "^3.1.1"
   },
   "devDependencies": {
+    "@types/lodash": "^4.14.153",
     "gulp": "^4.0.2",
     "gulp-copy": "^4.0.1",
     "ts-node": "^8.10.1",

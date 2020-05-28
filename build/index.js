@@ -1,3 +1,7 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const class_1 = require("./class");
+const lodash_1 = require("lodash");
 module.exports = (RED) => {
     function configuration(config) {
         RED.nodes.createNode(this, config);
@@ -8,12 +12,20 @@ module.exports = (RED) => {
         this.schema = config.schema;
     }
     RED.nodes.registerType('tuya-cloud-api-configuration', configuration);
-    function request(config) {
+    async function request(config) {
         RED.nodes.createNode(this, config);
         const node = this;
         const conf = RED.nodes.getNode(config.config);
         node.status({ fill: 'yellow', shape: 'dot', text: 'connecting' });
+        let api;
         try {
+            api = new class_1.TuyaApi({
+                clientId: conf.clientId,
+                secret: conf.secret,
+                schema: conf.schema,
+                region: conf.region,
+                handleToken: true,
+            });
             node.status({ fill: 'green', shape: 'dot', text: 'connected' });
         }
         catch (e) {
@@ -21,7 +33,17 @@ module.exports = (RED) => {
             throw e;
         }
         node.on('input', async (msg) => {
-            const { action, group: gid, requireSID, data } = msg.payload;
+            const { url, data } = msg.payload;
+            if (lodash_1.isEmpty(data)) {
+                msg.payload = await api.get(url).catch((e) => {
+                    node.error(`Error Requesting: ${JSON.stringify(e)}`);
+                });
+            }
+            else {
+                msg.payload = await api.post(url, data).catch((e) => {
+                    node.error(`Error Requesting: ${JSON.stringify(e)}`);
+                });
+            }
             return node.send(msg);
         });
     }
