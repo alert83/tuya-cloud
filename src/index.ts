@@ -1,21 +1,31 @@
 module.exports = (RED) => {
-    function configuration (config) {
+    function configuration(config) {
         RED.nodes.createNode(this, config);
         this.name = config.name;
-        this.key = config.key;
-        this.secret = config.secret;
+
+        this.clientId = this.credentials.clientId;
+        this.secret = this.credentials.secret;
+
         this.region = config.region;
         this.schema = config.schema;
     }
 
+    RED.nodes.registerType('tuya-cloud-api-configuration', configuration, {
+        credentials: {
+            clientId: {type: "text"},
+            secret: {type: "password"}
+        }
+    });
 
-    function request (config) {
+    //
+
+    function request(config) {
         RED.nodes.createNode(this, config);
         const node = this;
         const conf = RED.nodes.getNode(config.config);
 
         // console.dir({ conf: Object.keys(conf) }, {color: true});
-        node.status({ fill: 'yellow', shape: 'dot', text: 'connecting' });
+        node.status({fill: 'yellow', shape: 'dot', text: 'connecting'});
 
         // let api;
         try {
@@ -28,9 +38,9 @@ module.exports = (RED) => {
             //     region: conf.region,
             // });
 
-            node.status({ fill: 'green', shape: 'dot', text: 'connected' });
+            node.status({fill: 'green', shape: 'dot', text: 'connected'});
         } catch (e) {
-            node.status({ fill: 'red', shape: 'ring', text: e.message });
+            node.status({fill: 'red', shape: 'ring', text: e.message});
             throw e;
         }
 
@@ -46,7 +56,7 @@ module.exports = (RED) => {
         // });
 
         node.on('input', async (msg) => {
-            const { action, group: gid, requireSID, data } = msg.payload;
+            const {action, group: gid, requireSID, data} = msg.payload;
 
             // msg.payload = await api.request({ action, gid, data, requireSID }).catch((e) => {
             //     node.error(`Error Requesting: ${JSON.stringify(e)}`);
@@ -58,5 +68,4 @@ module.exports = (RED) => {
     }
 
     RED.nodes.registerType('tuya-cloud-api-request', request);
-    RED.nodes.registerType('tuya-cloud-api-configuration', configuration);
 };
