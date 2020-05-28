@@ -1,0 +1,37 @@
+{
+  "$schema": "http://json.schemastore.org/tsconfig",
+  "compilerOptions": {
+    "allowJs": false,
+    "removeComments": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "isolatedModules": false,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "noImplicitAny": false,
+    "strictNullChecks": true,
+    "resolveJsonModule": true,
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "target": "es2017",
+    "declaration": true,
+
+    "typeRoots": [
+      "node_modules/@types"
+    ],
+    "lib": [
+      "dom",
+      "es2018",
+      "es2019",
+      "es2020",
+      "esnext"
+    ],
+    "rootDir": "src",
+    "outDir": "build"
+  },
+  "include": ["src"],
+  "exclude": [
+    "node_modules/**",
+    "**/*.d.ts"
+  ]
+}
