@@ -8,7 +8,6 @@
             secret: {value: "", required: true},
             region: {value: "EU", required: true},
             schema: {value: "", required: true},
-            storeKey: {value: "", required: true},
         },
         icon: "white-globe.png",
         label: function () {
@@ -62,11 +61,6 @@
     <input type="text" id="node-config-input-schema" placeholder="Schema">
   </div>
 
-  <div class="form-row">
-    <label for="node-config-input-storeKey"><i class="fa fa-schema"></i> Store Key</label>
-    <input type="text" id="node-config-input-storeKey" placeholder="Store Key">
-  </div>
-
 </script>
 
 <script type="text/x-red" data-help-name="tuya-cloud-api-configuration">
@@ -87,9 +81,6 @@
 
     <dt>Schema</dt>
     <dd> Tuya SDK Schema</dd>
-
-    <dt>Store Key</dt>
-    <dd> Store Key for access tokens</dd>
   </dl>
 
 </script>

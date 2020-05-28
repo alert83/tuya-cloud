@@ -19,6 +19,12 @@ class TuyaApi {
         this.tokenExpiresAt = new Date();
         this.buildClient();
     }
+    static getInstance(options) {
+        if (!this._instance) {
+            this._instance = new TuyaApi(options);
+        }
+        return this._instance;
+    }
     buildClient() {
         this._client = got_1.default.extend({
             responseType: 'json',
@@ -62,7 +68,7 @@ class TuyaApi {
                             throw new Error(body.msg);
                         }
                         return response;
-                    }]
+                    }],
             }
         });
     }

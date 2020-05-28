@@ -8,13 +8,21 @@ export declare class TuyaApi {
     private _client;
     region: string;
     handleToken: boolean;
-    constructor(options: {
+    private static _instance;
+    protected constructor(options: {
         clientId: string;
         secret: string;
         schema: string;
         region?: string;
         handleToken?: boolean;
     });
+    static getInstance(options: {
+        clientId: string;
+        secret: string;
+        schema: string;
+        region?: string;
+        handleToken?: boolean;
+    }): TuyaApi;
     private buildClient;
     isTokenExpired(): boolean;
     setTokenObject(tokenAccess: any, tokenRefresh: any, tokenExpiresAt: any): void;

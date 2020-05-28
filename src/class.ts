@@ -16,7 +16,9 @@ export class TuyaApi {
     region: string;
     handleToken: boolean;
 
-    constructor(options: {
+    private static _instance: TuyaApi;
+
+    protected constructor(options: {
         clientId: string,
         secret: string,
         schema: string,
@@ -35,6 +37,19 @@ export class TuyaApi {
         this.tokenExpiresAt = new Date();
 
         this.buildClient();
+    }
+
+    static getInstance(options: {
+        clientId: string,
+        secret: string,
+        schema: string,
+        region?: string,
+        handleToken?: boolean,
+    }) {
+        if (!this._instance) {
+            this._instance = new TuyaApi(options);
+        }
+        return this._instance;
     }
 
     private buildClient() {
@@ -85,7 +100,11 @@ export class TuyaApi {
                         throw new Error(body.msg);
                     }
                     return response;
-                }]
+                }],
+
+                // beforeRetry: [
+                //
+                // ],
             }
         });
     }
