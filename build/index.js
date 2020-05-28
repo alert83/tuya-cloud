@@ -12,7 +12,7 @@ module.exports = (RED) => {
         this.schema = config.schema;
     }
     RED.nodes.registerType('tuya-cloud-api-configuration', configuration);
-    async function request(config) {
+    function request(config) {
         RED.nodes.createNode(this, config);
         const node = this;
         const conf = RED.nodes.getNode(config.config);

@@ -15,7 +15,7 @@ module.exports = (RED) => {
 
     //
 
-    async function request(config) {
+    function request(config) {
         RED.nodes.createNode(this, config);
         const node = this;
         const conf = RED.nodes.getNode(config.config);
