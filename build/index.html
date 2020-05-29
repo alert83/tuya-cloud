@@ -29,6 +29,21 @@
             return this.name || "Tuya Cloud API Request";
         }
     });
+
+    RED.nodes.registerType('tuya-cloud-api-token', {
+        category: 'network',
+        color: '#FE4A1C',
+        defaults: {
+            name: {value: "Tuya Cloud API Token"},
+            config: {value: "", type: "tuya-cloud-api-configuration"},
+        },
+        inputs: 1,
+        outputs: 1,
+        icon: "white-globe.png",
+        label: function () {
+            return this.name || "Tuya Cloud API Token";
+        }
+    });
 </script>
 
 <script type="text/x-red" data-template-name="tuya-cloud-api-configuration">
@@ -80,7 +95,7 @@
     <dd> Select the region for the account registered with TuyaSmart (Asia/America/Europe).</dd>
 
     <dt>Schema</dt>
-    <dd> Tuya SDK Schema</dd>
+    <dd> SDK Schema</dd>
   </dl>
 
 </script>
@@ -102,35 +117,57 @@
     <dt>payload<span class="property-type">object</span></dt>
     <dd> Payload object consisting of the various properties: </dd>
 
-    <dt>payload.action <span class="property-type">string</span></dt>
-    <dd> API action to invoke (for example, 'tuya.cloud.device.token.create') (see <a href="https://docs.tuya.com/en/cloudapi/appAPI/index.html">docs</a> for action list).</dd>
-
-    <dt class="optional">payload.group <span class="property-type">string</span></dt>
-    <dd> Group ID URL GET param</dd>
+    <dt>payload.url <span class="property-type">string</span></dt>
+    <dd> url path</dd>
 
     <dt class="optional">payload.data <span class="property-type">object</span></dt>
-    <dd> data to send in the request body</dd>
-
-    <dt class="optional">payload.requireSID <span class="property-type">boolean</span></dt>
-    <dd> Send Session ID with the API request <code>[Default: true]</code></dd>
+    <dd> post data</dd>
   </dl>
 
   <h3>Outputs</h3>
   <ol class="node-ports">
     <li>Standard output
       <dl class="message-properties">
-        <dt>payload <span class="property-type">string</span></dt>
+        <dt>payload <span class="property-type">object</span></dt>
         <dd>the standard output of the command.</dd>
       </dl>
     </li>
   </ol>
 
-  <h3>Details</h3>
-  <p><code>msg.payload</code> contains the parameters required for the Tuya API Cloud API. </p>
+<!--  <h3>Details</h3>-->
+<!--  <p><code>msg.payload</code> contains the parameters required for the Tuya API Cloud API. </p>-->
 
-  <h3>References</h3>
-  <ul>
-    <li><a href="https://github.com/TuyaAPI/cloud">TuyaAPI Cloud NodeJS Wrapper docs</a> - The NodeJS library used by this project for talking to the Tuya Cloud API</li>
-    <li><a href="https://docs.tuya.com/en/cloudapi/appAPI/index.html">Tuya Cloud API docs</a> - Official Tuya API documentation</li>
-  </ul>
+<!--  <h3>References</h3>-->
+<!--  <ul>-->
+<!--    <li><a href="https://github.com/TuyaAPI/cloud">TuyaAPI Cloud NodeJS Wrapper docs</a> - The NodeJS library used by this project for talking to the Tuya Cloud API</li>-->
+<!--    <li><a href="https://docs.tuya.com/en/cloudapi/appAPI/index.html">Tuya Cloud API docs</a> - Official Tuya API documentation</li>-->
+<!--  </ul>-->
+</script>
+
+<script type="text/x-red" data-template-name="tuya-cloud-api-token">
+  <div class="form-row">
+    <label for="node-input-name"><i class="icon-tag"></i> Name</label>
+    <input type="text" id="node-input-name" placeholder="Name">
+
+    <label for="node-input-config"><i class="icon-tag"></i> Configuration</label>
+    <input type="text" id="node-input-config" placeholder="Credentials">
+  </div>
+</script>
+
+<script type="text/x-red" data-help-name="tuya-cloud-api-token">
+  <p>Tuya API Cloud Token</p>
+
+  <h3>Inputs</h3>
+  <dl class="message-properties">
+  </dl>
+
+  <h3>Outputs</h3>
+  <ol class="node-ports">
+    <li>Standard output
+      <dl class="message-properties">
+        <dt>payload <span class="property-type">object</span></dt>
+        <dd>the standard output of the command.</dd>
+      </dl>
+    </li>
+  </ol>
 </script>

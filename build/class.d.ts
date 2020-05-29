@@ -1,29 +1,23 @@
+interface ITuyaApiOptions {
+    clientId: string;
+    secret: string;
+    schema: string;
+    region?: string;
+    handleToken?: boolean;
+}
 export declare class TuyaApi {
+    #private;
+    region: string;
+    handleToken: boolean;
     tokenAccess: string;
     tokenRefresh: string;
     tokenExpiresAt: Date;
-    private _clientId;
-    private _secret;
-    private _schema;
-    private _client;
-    region: string;
-    handleToken: boolean;
-    private static _instance;
-    protected constructor(options: {
-        clientId: string;
-        secret: string;
-        schema: string;
-        region?: string;
-        handleToken?: boolean;
-    });
-    static getInstance(options: {
-        clientId: string;
-        secret: string;
-        schema: string;
-        region?: string;
-        handleToken?: boolean;
-    }): TuyaApi;
+    private static instance;
+    protected constructor(options: ITuyaApiOptions);
+    static getInstance(options: ITuyaApiOptions): TuyaApi;
     private buildClient;
+    private checkRespAndUpdateToken;
+    private buildHeaders;
     isTokenExpired(): boolean;
     setTokenObject(tokenAccess: any, tokenRefresh: any, tokenExpiresAt: any): void;
     getTokenObject(): {
@@ -40,3 +34,4 @@ export declare class TuyaApi {
     getDeviceSpec(deviceId: any): Promise<unknown>;
     sendDeviceCommands(deviceId: any, commands: any[]): Promise<unknown>;
 }
+export {};

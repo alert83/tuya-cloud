@@ -1,6 +1,5 @@
 import {TuyaApi} from "./class";
 import {isEmpty} from "lodash";
-import {v4} from "uuid";
 
 module.exports = (RED) => {
     function configuration(config) {
@@ -42,16 +41,18 @@ module.exports = (RED) => {
                 });
 
                 if (isEmpty(data)) {
-                    msg.payload = await client.get(url).catch((e) => {
-                        node.error(`Error Get Requesting: ${JSON.stringify(e.message)}`);
-                    });
+                    msg.payload = await client.get(url)
+                        .catch((e) => {
+                            node.error(`Error Get Requesting: ${JSON.stringify([e.code, e.message])}`);
+                        });
                 } else {
-                    msg.payload = await client.post(url, data).catch((e) => {
-                        node.error(`Error Post Requesting: ${JSON.stringify(e.message)}`);
-                    });
+                    msg.payload = await client.post(url, data)
+                        .catch((e) => {
+                            node.error(`Error Post Requesting: ${JSON.stringify([e.code, e.message])}`);
+                        });
                 }
             } catch (e) {
-                node.error(`Error Requesting: ${JSON.stringify(e.message)}`);
+                node.error(`Error Requesting: ${JSON.stringify([e.code, e.message])}`);
             }
 
             return node.send(msg);
@@ -60,4 +61,40 @@ module.exports = (RED) => {
     }
 
     RED.nodes.registerType('tuya-cloud-api-request', request);
+
+    //
+
+    function token(config) {
+        RED.nodes.createNode(this, config);
+        const node = this;
+        const conf = RED.nodes.getNode(config.config);
+
+        node.on('input', async (msg) => {
+            const {url, data} = msg.payload;
+
+            try {
+                const client = TuyaApi.getInstance({
+                    clientId: conf.clientId,
+                    secret: conf.secret,
+                    schema: conf.schema,
+                    region: conf.region,
+                    handleToken: true,
+                });
+
+                msg.payload = await client.getToken()
+                    .then(() => client.refreshToken())
+                    .catch((e) => {
+                        node.error(`Error Token Requesting: ${JSON.stringify([e.code, e.message])}`);
+                    });
+
+            } catch (e) {
+                node.error(`Error Requesting: ${JSON.stringify([e.code, e.message])}`);
+            }
+
+            return node.send(msg);
+        });
+
+    }
+
+    RED.nodes.registerType('tuya-cloud-api-token', token);
 };

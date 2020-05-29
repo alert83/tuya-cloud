@@ -1,36 +1,47 @@
 // tslint:disable:max-classes-per-file
 import got, {Got} from "got";
-import crypto from "crypto";
+import {createHmac} from "crypto";
+import {isEmpty} from "lodash";
+import {NormalizedOptions as RequestNormalizedOptions} from "got/dist/source/core";
+
+interface ITuyaApiOptions {
+    clientId: string,
+    secret: string,
+    schema: string,
+    region?: string,
+    handleToken?: boolean,
+}
+
+interface ITuyaApiResponse {
+    result?: any;
+    code?: number;
+    msg?: string;
+    success: boolean;
+    t: number;
+}
 
 export class TuyaApi {
+    #clientId: string;
+    #secret: string;
+    #schema: string;
+    region: string;
+    handleToken: boolean;
+
     tokenAccess: string;
     tokenRefresh: string;
     tokenExpiresAt: Date;
 
-    private _clientId: string;
-    private _secret: string;
-    private _schema: string;
+    #client: Got;
 
-    private _client: Got;
+    private static instance: TuyaApi;
 
-    region: string;
-    handleToken: boolean;
-
-    private static _instance: TuyaApi;
-
-    protected constructor(options: {
-        clientId: string,
-        secret: string,
-        schema: string,
-        region?: string,
-        handleToken?: boolean,
-    }) {
-        this._clientId = options.clientId;
-        this._secret = options.secret;
-        this._schema = options.schema;
+    protected constructor(options: ITuyaApiOptions) {
+        this.#clientId = options.clientId;
+        this.#secret = options.secret;
+        this.#schema = options.schema;
 
         this.region = options.region ?? 'eu';
-        this.handleToken = options.handleToken ?? false;
+        this.handleToken = options.handleToken ?? true;
 
         this.tokenAccess = '';
         this.tokenRefresh = '';
@@ -39,76 +50,90 @@ export class TuyaApi {
         this.buildClient();
     }
 
-    static getInstance(options: {
-        clientId: string,
-        secret: string,
-        schema: string,
-        region?: string,
-        handleToken?: boolean,
-    }) {
-        if (!this._instance) {
-            this._instance = new TuyaApi(options);
+    static getInstance(options: ITuyaApiOptions) {
+        if (!this.instance) {
+            this.instance = new TuyaApi(options);
         }
-        return this._instance;
+        return this.instance;
     }
 
     private buildClient() {
-        this._client = got.extend({
+        this.#client = got.extend({
             responseType: 'json',
             prefixUrl: `https://openapi.tuya${this.region}.com/v1.0/`,
             headers: {
-                client_id: this._clientId,
+                client_id: this.#clientId,
                 sign_method: 'HMAC-SHA256',
             },
             hooks: {
                 beforeRequest: [async options => {
+                    // console.log('beforeRequest');
+
                     const isTokenUrl = options.url.toString().includes('token');
 
-                    if (!isTokenUrl && this.tokenAccess === '' && this.handleToken) {
-                        await this.getToken();
+                    if (!isTokenUrl && this.handleToken) {
+                        if (isEmpty(this.tokenAccess)) {
+                            await this.getToken();
+                        }
+
+                        if (this.isTokenExpired()) {
+                            await this.getToken();
+                            await this.refreshToken();
+                        }
                     }
 
-                    if (!isTokenUrl && this.isTokenExpired()) {
-                        await this.refreshToken();
-                    }
-
-                    const now = new Date().getTime();
-                    options.headers.t = now.toString();
-
-                    // Caculate signature
-                    let sign = '';
-                    if (isTokenUrl) {
-                        sign = crypto
-                            .createHmac('sha256', this._secret)
-                            .update(this._clientId + now.toString())
-                            .digest('hex')
-                            .toUpperCase();
-                    } else {
-                        sign = crypto
-                            .createHmac('sha256', this._secret)
-                            .update(`${this._clientId}${this.tokenAccess}${now}`)
-                            .digest('hex')
-                            .toUpperCase();
-                        options.headers.access_token = this.tokenAccess;
-                    }
-                    options.headers.sign = sign;
+                    this.buildHeaders(options);
                 }],
 
-                afterResponse: [response => {
-                    const body = response.body as any;
+                afterResponse: [async (response, retryWithMergedOptions) => {
+                    // console.log('afterResponse');
+
+                    const isTokenUrl = response.request.requestUrl.toString().includes('token');
+
+                    const body = response.body as ITuyaApiResponse;
                     if (!body.success) {
-                        throw new Error(body.msg);
+                        // console.log(body);
+                        throw new TuyaApiError(body.code, body.msg, body.t);
                     }
                     return response;
                 }],
 
-                // beforeRetry: [
-                //
-                // ],
+                beforeRetry: [async (options, error, retryCount) => {
+                    // console.log('beforeRetry', error?.code);
+                }]
             }
         });
     }
 
+    private async checkRespAndUpdateToken(code: number) {
+        switch (code) {
+            case 1010: // token invalid
+                if (isEmpty(this.tokenAccess)) {
+                    await this.getToken();
+                } else {
+                    await this.getToken();
+                    await this.refreshToken();
+                }
+                break;
+        }
+    }
+
+    private buildHeaders(options: RequestNormalizedOptions) {
+        const isTokenUrl = options.url.toString().includes('token');
+
+        if (!isTokenUrl) {
+            options.headers.access_token = this.tokenAccess;
+        }
+
+        const timestamp = new Date().getTime();
+        options.headers.t = timestamp.toString();
+
+        // Calculate signature
+        options.headers.sign = createHmac('sha256', this.#secret)
+            .update(`${this.#clientId}${(isTokenUrl ? '' : this.tokenAccess)}${timestamp}`)
+            .digest('hex')
+            .toUpperCase();
+    }
 
     isTokenExpired() {
         return new Date().getTime() > this.tokenExpiresAt.getTime();
@@ -129,53 +154,56 @@ export class TuyaApi {
     }
 
     async getToken() {
-        // if (this.handleToken) {
-        //     throw new HandleTokenError();
-        // }
-        const {result: {access_token, refresh_token, expire_time}} = await this._client
+        // console.log('getToken');
+
+        const {result: {access_token, refresh_token, expire_time}} = await this.#client
             .get('token?grant_type=1')
             .json<{ result: any }>();
+
         this.tokenAccess = access_token;
         this.tokenRefresh = refresh_token;
         this.tokenExpiresAt = new Date(new Date().getTime() + expire_time * 1000);
     }
 
     async refreshToken() {
-        const {result: {access_token, refresh_token, expire_time}} = await this._client
+        // console.log('refreshToken');
+
+        const {result: {access_token, refresh_token, expire_time}} = await this.#client
             .get(`token/${this.tokenRefresh}`)
             .json<{ result: any }>();
+
         this.tokenAccess = access_token;
         this.tokenRefresh = refresh_token;
         this.tokenExpiresAt = new Date(new Date().getTime() + expire_time * 1000);
     }
 
     async get(uri) {
-        return this._client.get(uri).json();
+        return this.#client.get(uri).json();
     }
 
     async post(uri, data) {
-        return this._client.post(uri, {json: data}).json();
+        return this.#client.post(uri, {json: data}).json();
     }
 
     async getDeviceStatus(deviceId) {
-        return this._client.get(`devices/${deviceId}/status`).json();
+        return this.#client.get(`devices/${deviceId}/status`).json();
     }
 
     async getDevice(deviceId) {
-        return this._client.get(`devices/${deviceId}`).json();
+        return this.#client.get(`devices/${deviceId}`).json();
     }
 
     async getDeviceSpec(deviceId) {
-        return this._client.get(`devices/${deviceId}/specifications`).json();
+        return this.#client.get(`devices/${deviceId}/specifications`).json();
     }
 
     async sendDeviceCommands(deviceId, commands: any[]) {
-        return this._client.post(`devices/${deviceId}/commands`, {json: {commands}}).json();
+        return this.#client.post(`devices/${deviceId}/commands`, {json: {commands}}).json();
     }
 }
 
-class HandleTokenError extends Error {
-    constructor() {
-        super('Token acquisition is automatically handled.');
+class TuyaApiError extends Error {
+    constructor(public code, message, public timestamp) {
+        super(message);
     }
 }

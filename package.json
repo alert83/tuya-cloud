@@ -4,7 +4,7 @@
   "description": "",
   "main": "build/",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "tsc && node ./build/test",
     "build": "tsc && gulp",
     "_preversion": "npm run build && changelog-verify CHANGELOG.md",
     "_version": "version-changelog CHANGELOG.md && git add CHANGELOG.md"
@@ -21,15 +21,16 @@
   "license": "ISC",
   "dependencies": {
     "bluebird": "^3.7.2",
+    "dotenv": "^8.2.0",
     "got": "^11.1.4",
     "lodash": "^4.17.15",
     "moment": "^2.26.0",
     "nodemailer": "^6.4.7",
-    "uuid": "^8.1.0",
-    "version-changelog": "^3.1.1"
+    "uuid": "^8.1.0"
   },
   "devDependencies": {
     "@types/lodash": "^4.14.153",
+    "@types/node": "^12.12.42",
     "@types/uuid": "^8.0.0",
     "gulp": "^4.0.2",
     "gulp-copy": "^4.0.1",
