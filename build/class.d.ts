@@ -15,6 +15,7 @@ export declare class TuyaApi {
     private static instance;
     protected constructor(options: ITuyaApiOptions);
     static getInstance(options: ITuyaApiOptions): TuyaApi;
+    getCredsHash(): string;
     private buildClient;
     private checkRespAndUpdateToken;
     private buildHeaders;

@@ -33,7 +33,7 @@ export class TuyaApi {
 
     #client: Got;
 
-    private static instance: TuyaApi;
+    private static instance: TuyaApi | undefined;
 
     protected constructor(options: ITuyaApiOptions) {
         this.#clientId = options.clientId;
@@ -58,17 +58,21 @@ export class TuyaApi {
             region: options.region ?? 'eu',
         });
 
-        const oldCred = JSON.stringify({
-            clientId: this.instance.#clientId,
-            secret: this.instance.#secret,
-            schema: this.instance.#schema,
-            region: this.instance.region,
-        });
+        const oldCred = this?.instance?.getCredsHash();
 
         if (!this.instance || newCred !== oldCred) {
             this.instance = new TuyaApi(options);
         }
         return this.instance;
+    }
+
+    getCredsHash() {
+        return JSON.stringify({
+            clientId: this.#clientId,
+            secret: this.#secret,
+            schema: this.#schema,
+            region: this.region,
+        });
     }
 
     private buildClient() {
