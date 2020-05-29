@@ -51,7 +51,21 @@ export class TuyaApi {
     }
 
     static getInstance(options: ITuyaApiOptions) {
-        if (!this.instance) {
+        const newCred = JSON.stringify({
+            clientId: options.clientId,
+            secret: options.secret,
+            schema: options.schema,
+            region: options.region ?? 'eu',
+        });
+
+        const oldCred = JSON.stringify({
+            clientId: this.instance.#clientId,
+            secret: this.instance.#secret,
+            schema: this.instance.#schema,
+            region: this.instance.region,
+        });
+
+        if (!this.instance || newCred !== oldCred) {
             this.instance = new TuyaApi(options);
         }
         return this.instance;

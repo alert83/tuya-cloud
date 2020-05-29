@@ -39,7 +39,20 @@ class TuyaApi {
         this.buildClient();
     }
     static getInstance(options) {
-        if (!this.instance) {
+        var _a;
+        const newCred = JSON.stringify({
+            clientId: options.clientId,
+            secret: options.secret,
+            schema: options.schema,
+            region: (_a = options.region) !== null && _a !== void 0 ? _a : 'eu',
+        });
+        const oldCred = JSON.stringify({
+            clientId: __classPrivateFieldGet(this.instance, _clientId),
+            secret: __classPrivateFieldGet(this.instance, _secret),
+            schema: __classPrivateFieldGet(this.instance, _schema),
+            region: this.instance.region,
+        });
+        if (!this.instance || newCred !== oldCred) {
             this.instance = new TuyaApi(options);
         }
         return this.instance;
