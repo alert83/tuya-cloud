@@ -28,7 +28,7 @@ module.exports = (RED) => {
         //     .then(() => node.status({fill: 'green', shape: 'dot', text: 'connected'}))
         //     .catch(e => node.status({fill: 'red', shape: 'ring', text: e.message}));
 
-        node.on('input', async (msg) => {
+        node.on('input', async (msg, send, done) => {
             const {url, data} = msg.payload;
 
             try {
@@ -41,21 +41,28 @@ module.exports = (RED) => {
                 });
 
                 if (isEmpty(data)) {
-                    msg.payload = await client.get(url)
-                        .catch((e) => {
-                            node.error(`Error Get Requesting: ${JSON.stringify([e.code, e.message])}`);
-                        });
+                    msg.payload = await client.get(url);
                 } else {
-                    msg.payload = await client.post(url, data)
-                        .catch((e) => {
-                            node.error(`Error Post Requesting: ${JSON.stringify([e.code, e.message])}`);
-                        });
+                    msg.payload = await client.post(url, data);
                 }
-            } catch (e) {
-                node.error(`Error Requesting: ${JSON.stringify([e.code, e.message])}`);
-            }
 
-            return node.send(msg);
+                // tslint:disable-next-line:only-arrow-functions
+                send = send || function () {
+                    node.send.apply(node, arguments);
+                };
+                send(msg);
+
+                if (done) done();
+            } catch (e) {
+                const err = `Error Requesting: ${JSON.stringify([e.code, e.message])}`;
+                if (done) {
+                    // Node-RED 1.0 compatible
+                    done(err);
+                } else {
+                    // Node-RED 0.x compatible
+                    node.error(err, msg);
+                }
+            }
         });
 
     }
@@ -69,7 +76,7 @@ module.exports = (RED) => {
         const node = this;
         const conf = RED.nodes.getNode(config.config);
 
-        node.on('input', async (msg) => {
+        node.on('input', async (msg, send, done) => {
             const {url, data} = msg.payload;
 
             try {
@@ -81,17 +88,26 @@ module.exports = (RED) => {
                     handleToken: true,
                 });
 
-                msg.payload = await client.getToken()
-                    .then(() => client.refreshToken())
-                    .catch((e) => {
-                        node.error(`Error Token Requesting: ${JSON.stringify([e.code, e.message])}`);
-                    });
+                msg.payload = await client.getToken().then(() => client.refreshToken());
 
+                // tslint:disable-next-line:only-arrow-functions
+                send = send || function () {
+                    node.send.apply(node, arguments);
+                };
+                send(msg);
+
+                if (done) done();
             } catch (e) {
-                node.error(`Error Requesting: ${JSON.stringify([e.code, e.message])}`);
-            }
+                const err = `Error Requesting: ${JSON.stringify([e.code, e.message])}`
 
-            return node.send(msg);
+                if (done) {
+                    // Node-RED 1.0 compatible
+                    done(err);
+                } else {
+                    // Node-RED 0.x compatible
+                    node.error(err, msg);
+                }
+            }
         });
 
     }
