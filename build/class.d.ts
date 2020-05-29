@@ -25,8 +25,12 @@ export declare class TuyaApi {
         tokenRefresh: string;
         tokenExpiresAt: string;
     };
-    getToken(): Promise<void>;
-    refreshToken(): Promise<void>;
+    getToken(): Promise<{
+        result: any;
+    }>;
+    refreshToken(): Promise<{
+        result: any;
+    }>;
     get(uri: any): Promise<unknown>;
     post(uri: any, data: any): Promise<unknown>;
     getDeviceStatus(deviceId: any): Promise<unknown>;

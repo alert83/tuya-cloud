@@ -120,18 +120,20 @@ class TuyaApi {
         };
     }
     async getToken() {
-        const { result: { access_token, refresh_token, expire_time } } = await __classPrivateFieldGet(this, _client).get('token?grant_type=1')
+        const resp = await __classPrivateFieldGet(this, _client).get('token?grant_type=1')
             .json();
-        this.tokenAccess = access_token;
-        this.tokenRefresh = refresh_token;
-        this.tokenExpiresAt = new Date(new Date().getTime() + expire_time * 1000);
+        this.tokenAccess = resp.result.access_token;
+        this.tokenRefresh = resp.result.refresh_token;
+        this.tokenExpiresAt = new Date(new Date().getTime() + resp.result.expire_time * 1000);
+        return resp;
     }
     async refreshToken() {
-        const { result: { access_token, refresh_token, expire_time } } = await __classPrivateFieldGet(this, _client).get(`token/${this.tokenRefresh}`)
+        const resp = await __classPrivateFieldGet(this, _client).get(`token/${this.tokenRefresh}`)
             .json();
-        this.tokenAccess = access_token;
-        this.tokenRefresh = refresh_token;
-        this.tokenExpiresAt = new Date(new Date().getTime() + expire_time * 1000);
+        this.tokenAccess = resp.result.access_token;
+        this.tokenRefresh = resp.result.refresh_token;
+        this.tokenExpiresAt = new Date(new Date().getTime() + resp.result.expire_time * 1000);
+        return resp;
     }
     async get(uri) {
         return __classPrivateFieldGet(this, _client).get(uri).json();

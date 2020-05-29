@@ -156,25 +156,29 @@ export class TuyaApi {
     async getToken() {
         // console.log('getToken');
 
-        const {result: {access_token, refresh_token, expire_time}} = await this.#client
+        const resp = await this.#client
             .get('token?grant_type=1')
             .json<{ result: any }>();
 
-        this.tokenAccess = access_token;
-        this.tokenRefresh = refresh_token;
-        this.tokenExpiresAt = new Date(new Date().getTime() + expire_time * 1000);
+        this.tokenAccess = resp.result.access_token;
+        this.tokenRefresh = resp.result.refresh_token;
+        this.tokenExpiresAt = new Date(new Date().getTime() + resp.result.expire_time * 1000);
+
+        return resp;
     }
 
     async refreshToken() {
         // console.log('refreshToken');
 
-        const {result: {access_token, refresh_token, expire_time}} = await this.#client
+        const resp = await this.#client
             .get(`token/${this.tokenRefresh}`)
             .json<{ result: any }>();
 
-        this.tokenAccess = access_token;
-        this.tokenRefresh = refresh_token;
-        this.tokenExpiresAt = new Date(new Date().getTime() + expire_time * 1000);
+        this.tokenAccess = resp.result.access_token;
+        this.tokenRefresh = resp.result.refresh_token;
+        this.tokenExpiresAt = new Date(new Date().getTime() + resp.result.expire_time * 1000);
+
+        return resp;
     }
 
     async get(uri) {
