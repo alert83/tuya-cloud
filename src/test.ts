@@ -12,5 +12,10 @@ config();
         handleToken: true,
     });
 
-    console.log(await client.get(`devices/20100800bcddc2aed93b/status`));
+    await Promise.all([
+        client.get(`devices/20100800bcddc2aed93b/status`),
+        client.getAndRefreshToken(),
+        client.get(`devices/20100800bcddc2aed93b/status`),
+        client.get(`devices/20100800bcddc2aed93b/status`),
+    ])
 })().catch(console.error);

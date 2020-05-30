@@ -65,7 +65,7 @@ module.exports = (RED) => {
                     region: conf.region,
                     handleToken: true,
                 });
-                msg.payload = await client.getToken().then(() => client.refreshToken());
+                msg.payload = await client.getAndRefreshToken();
                 send = send || function () {
                     node.send.apply(node, arguments);
                 };

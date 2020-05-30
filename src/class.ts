@@ -3,6 +3,7 @@ import got, {Got} from "got";
 import {createHmac} from "crypto";
 import {isEmpty} from "lodash";
 import {NormalizedOptions as RequestNormalizedOptions} from "got/dist/source/core";
+import {createReadWriteLock} from "locks";
 
 interface ITuyaApiOptions {
     clientId: string,
@@ -34,6 +35,9 @@ export class TuyaApi {
     #client: Got;
 
     private static instance: TuyaApi | undefined;
+
+    static rwStaticLock = createReadWriteLock();
+    private rwLock = createReadWriteLock();
 
     protected constructor(options: ITuyaApiOptions) {
         this.#clientId = options.clientId;
@@ -88,62 +92,58 @@ export class TuyaApi {
             },
             hooks: {
                 beforeRequest: [async options => {
-                    // console.log('beforeRequest');
+                    console.log('beforeRequest:', options.url.toString());
 
                     const isTokenUrl = options.url.toString().includes('token');
 
                     if (!isTokenUrl && this.handleToken) {
-                        if (isEmpty(this.tokenAccess)) {
-                            await this.getToken();
-                        }
-
-                        if (this.isTokenExpired()) {
-                            await this.getToken();
-                            await this.refreshToken();
+                        if (isEmpty(this.tokenAccess) || this.isTokenExpired()) {
+                            await this.getAndRefreshToken();
                         }
                     }
 
-                    this.buildHeaders(options);
+                    await this.buildHeaders(options);
                 }],
 
                 afterResponse: [async (response, retryWithMergedOptions) => {
-                    // console.log('afterResponse');
+                    console.log('afterResponse', response.request.options.url.toString());
 
-                    const isTokenUrl = response.request.requestUrl.toString().includes('token');
+                    const isTokenUrl = response.request.options.url.toString().includes('token');
 
                     const body = response.body as ITuyaApiResponse;
                     if (!body.success) {
-                        // console.log(body);
+                        console.log(body);
                         throw new TuyaApiError(body.code, body.msg, body.t);
                     }
                     return response;
                 }],
 
                 beforeRetry: [async (options, error, retryCount) => {
-                    // console.log('beforeRetry', error?.code);
+                    console.log('beforeRetry', error?.code);
                 }]
             }
         });
     }
 
-    private async checkRespAndUpdateToken(code: number) {
-        switch (code) {
-            case 1010: // token invalid
-                if (isEmpty(this.tokenAccess)) {
-                    await this.getToken();
-                } else {
-                    await this.getToken();
-                    await this.refreshToken();
-                }
-                break;
-        }
-    }
-
-    private buildHeaders(options: RequestNormalizedOptions) {
+    private async buildHeaders(options: RequestNormalizedOptions) {
         const isTokenUrl = options.url.toString().includes('token');
 
         if (!isTokenUrl) {
-            options.headers.access_token = this.tokenAccess;
+            await new Promise((resolve, reject) => {
+                this.rwLock.readLock(() => {
+                    console.log('Read Lock');
+
+                    setTimeout(() => {
+                        (async () => {
+                            options.headers.access_token = this.tokenAccess;
+                            resolve();
+                        })()
+                            .catch(reject)
+                            .finally(() => this.rwLock.unlock())
+                        ;
+                    }, 0);
+                });
+            });
         }
 
         const timestamp = new Date().getTime();
@@ -157,7 +157,8 @@ export class TuyaApi {
     }
 
     isTokenExpired() {
-        return new Date().getTime() > this.tokenExpiresAt.getTime();
+        const _5min = 5 * 60 * 1000;
+        return (new Date().getTime() + _5min) > this.tokenExpiresAt.getTime();
     }
 
     setTokenObject(tokenAccess, tokenRefresh, tokenExpiresAt) {
@@ -175,55 +176,98 @@ export class TuyaApi {
     }
 
     async getToken() {
-        // console.log('getToken');
+        console.log('getToken');
 
-        const resp = await this.#client
-            .get('token?grant_type=1')
-            .json<{ result: any }>();
+        return new Promise((resolve, reject) => {
+            if (this.rwLock.isLocked === 'W')
+                return resolve();
 
-        this.tokenAccess = resp.result.access_token;
-        this.tokenRefresh = resp.result.refresh_token;
-        this.tokenExpiresAt = new Date(new Date().getTime() + resp.result.expire_time * 1000);
+            this.rwLock.writeLock(() => {
+                console.log('Write Lock');
 
-        return resp;
+                this.#client
+                    .get('token?grant_type=1')
+                    .json<ITuyaApiResponse>()
+                    .then((resp) => {
+                        this.setTokenData(resp);
+                        resolve(resp);
+                    })
+                    .catch(reject)
+                    .finally(() => this.rwLock.unlock())
+                ;
+
+            });
+        });
     }
 
     async refreshToken() {
-        // console.log('refreshToken');
+        console.log('refreshToken');
 
-        const resp = await this.#client
-            .get(`token/${this.tokenRefresh}`)
-            .json<{ result: any }>();
+        return new Promise((resolve, reject) => {
+            if (this.rwLock.isLocked === 'W')
+                return resolve();
 
-        this.tokenAccess = resp.result.access_token;
-        this.tokenRefresh = resp.result.refresh_token;
-        this.tokenExpiresAt = new Date(new Date().getTime() + resp.result.expire_time * 1000);
+            this.rwLock.writeLock(() => {
+                console.log('Write Lock');
 
-        return resp;
+                this.#client
+                    .get(`token/${this.tokenRefresh}`)
+                    .json<ITuyaApiResponse>()
+                    .then((resp) => {
+                        this.setTokenData(resp);
+                        resolve(resp);
+                    })
+                    .catch(reject)
+                    .finally(() => this.rwLock.unlock())
+                ;
+            });
+        });
+    }
+
+    async getAndRefreshToken() {
+        console.log('getAndRefreshToken');
+
+        if (this.rwLock.isLocked === 'W') return;
+
+        return new Promise((resolve, reject) => {
+            this.rwLock.writeLock(() => {
+                console.log('Write Lock', this.rwLock.isLocked);
+
+                setTimeout(() => {
+                    (async () => {
+                        let resp = await this.#client.get('token?grant_type=1').json<ITuyaApiResponse>();
+                        this.setTokenData(resp);
+
+                        if (this.isTokenExpired()) {
+                            resp = await this.#client.get(`token/${this.tokenRefresh}`).json<ITuyaApiResponse>();
+                            this.setTokenData(resp);
+                        }
+
+                        resolve(resp);
+                    })()
+                        .catch(reject)
+                        .finally(() => this.rwLock.unlock())
+                    ;
+
+                }, 0);
+            });
+        });
+    }
+
+    private setTokenData(response: ITuyaApiResponse) {
+        const {result: {access_token, refresh_token, expire_time}} = response;
+        this.tokenAccess = access_token;
+        this.tokenRefresh = refresh_token;
+        this.tokenExpiresAt = new Date(new Date().getTime() + expire_time * 1000);
     }
 
     async get(uri) {
+        // `devices/${deviceId}/status`
         return this.#client.get(uri).json();
     }
 
     async post(uri, data) {
         return this.#client.post(uri, {json: data}).json();
-    }
-
-    async getDeviceStatus(deviceId) {
-        return this.#client.get(`devices/${deviceId}/status`).json();
-    }
-
-    async getDevice(deviceId) {
-        return this.#client.get(`devices/${deviceId}`).json();
-    }
-
-    async getDeviceSpec(deviceId) {
-        return this.#client.get(`devices/${deviceId}/specifications`).json();
-    }
-
-    async sendDeviceCommands(deviceId, commands: any[]) {
-        return this.#client.post(`devices/${deviceId}/commands`, {json: {commands}}).json();
     }
 }
 

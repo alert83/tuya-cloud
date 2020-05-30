@@ -88,7 +88,7 @@ module.exports = (RED) => {
                     handleToken: true,
                 });
 
-                msg.payload = await client.getToken().then(() => client.refreshToken());
+                msg.payload = await client.getAndRefreshToken();
 
                 // tslint:disable-next-line:only-arrow-functions
                 send = send || function () {
