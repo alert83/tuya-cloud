@@ -40,6 +40,28 @@ class TuyaApi {
         this.tokenExpiresAt = new Date();
         this.buildClient();
     }
+    static getInstance(options) {
+        if (!this.instance) {
+            this.instance = new TuyaApi(options);
+        }
+        return this.instance;
+    }
+    isNewCreds(options) {
+        var _a;
+        const oldCred = JSON.stringify({
+            clientId: __classPrivateFieldGet(this, _clientId),
+            secret: __classPrivateFieldGet(this, _secret),
+            schema: __classPrivateFieldGet(this, _schema),
+            region: this.region,
+        });
+        const newCred = JSON.stringify({
+            clientId: options.clientId,
+            secret: options.secret,
+            schema: options.schema,
+            region: (_a = options.region) !== null && _a !== void 0 ? _a : 'eu',
+        });
+        return newCred !== oldCred;
+    }
     buildClient() {
         __classPrivateFieldSet(this, _client, got_1.default.extend({
             responseType: 'json',

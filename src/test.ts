@@ -4,7 +4,7 @@ import {config} from "dotenv";
 config();
 
 (async () => {
-    const client = new TuyaApi({
+    const client = TuyaApi.getInstance({
         clientId: process.env.CLIENT_ID ?? '',
         secret: process.env.SECRET ?? '',
         schema: 'alert83',

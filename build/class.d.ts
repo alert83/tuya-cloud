@@ -12,8 +12,11 @@ export declare class TuyaApi {
     tokenAccess: string;
     tokenRefresh: string;
     tokenExpiresAt: Date;
+    private static instance;
     private tokenLock;
-    constructor(options: ITuyaApiOptions);
+    protected constructor(options: ITuyaApiOptions);
+    static getInstance(options: ITuyaApiOptions): TuyaApi;
+    isNewCreds(options: ITuyaApiOptions): boolean;
     private buildClient;
     private buildHeaders;
     isTokenExpired(): boolean;

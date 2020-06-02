@@ -34,13 +34,13 @@ export class TuyaApi {
 
     #client: Got;
 
-    // private static instance: TuyaApi | undefined;
+    private static instance: TuyaApi | undefined;
 
     // static rwStaticLock = createReadWriteLock();
     // private requestLock = createReadWriteLock();
     private tokenLock = createReadWriteLock();
 
-    constructor(options: ITuyaApiOptions) {
+    protected constructor(options: ITuyaApiOptions) {
         this.#clientId = options.clientId;
         this.#secret = options.secret;
         this.#schema = options.schema;
@@ -55,40 +55,29 @@ export class TuyaApi {
         this.buildClient();
     }
 
-    // static getInstance(options: ITuyaApiOptions) {
-    //     // this.rwStaticLock.readLock(() => {
-    //     if (!this.instance) {
-    //         this.rwStaticLock.writeLock(() => {
-    //             console.log('Write Static Lock');
-    //             this.instance = new TuyaApi(options);
-    //             this.rwStaticLock.unlock();
-    //         });
-    //     } else {
-    //         const isNewCreds = this.instance?.isNewCreds(options);
-    //
-    //     }
-    //
-    //     // this.rwStaticLock.unlock();
-    //     return this.instance;
-    //     // });
-    // }
+    static getInstance(options: ITuyaApiOptions) {
+        if (!this.instance) {
+            this.instance = new TuyaApi(options);
+        }
+        return this.instance;
+    }
 
-    // isNewCreds(options: ITuyaApiOptions) {
-    //     const oldCred = JSON.stringify({
-    //         clientId: this.#clientId,
-    //         secret: this.#secret,
-    //         schema: this.#schema,
-    //         region: this.region,
-    //     });
-    //     const newCred = JSON.stringify({
-    //         clientId: options.clientId,
-    //         secret: options.secret,
-    //         schema: options.schema,
-    //         region: options.region ?? 'eu',
-    //     });
-    //
-    //     return newCred !== oldCred;
-    // }
+    isNewCreds(options: ITuyaApiOptions) {
+        const oldCred = JSON.stringify({
+            clientId: this.#clientId,
+            secret: this.#secret,
+            schema: this.#schema,
+            region: this.region,
+        });
+        const newCred = JSON.stringify({
+            clientId: options.clientId,
+            secret: options.secret,
+            schema: options.schema,
+            region: options.region ?? 'eu',
+        });
+
+        return newCred !== oldCred;
+    }
 
     private buildClient() {
         this.#client = got.extend({

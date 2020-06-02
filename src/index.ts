@@ -35,7 +35,7 @@ module.exports = (RED) => {
             const {url, data} = msg.payload;
 
             try {
-                const client = nodeContext.get(TUYA_CLIENT) ?? new TuyaApi({
+                const client = TuyaApi.getInstance({
                     clientId: conf.clientId,
                     secret: conf.secret,
                     schema: conf.schema,
@@ -84,7 +84,7 @@ module.exports = (RED) => {
             const {url, data} = msg.payload;
 
             try {
-                const client = nodeContext.get(TUYA_CLIENT) ?? new TuyaApi({
+                const client = TuyaApi.getInstance({
                     clientId: conf.clientId,
                     secret: conf.secret,
                     schema: conf.schema,

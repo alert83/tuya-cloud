@@ -19,10 +19,9 @@ module.exports = (RED) => {
         const conf = RED.nodes.getNode(config.config);
         const nodeContext = this.context();
         node.on('input', async (msg, send, done) => {
-            var _a;
             const { url, data } = msg.payload;
             try {
-                const client = (_a = nodeContext.get(TUYA_CLIENT)) !== null && _a !== void 0 ? _a : new class_1.TuyaApi({
+                const client = class_1.TuyaApi.getInstance({
                     clientId: conf.clientId,
                     secret: conf.secret,
                     schema: conf.schema,
@@ -60,10 +59,9 @@ module.exports = (RED) => {
         const conf = RED.nodes.getNode(config.config);
         const nodeContext = this.context();
         node.on('input', async (msg, send, done) => {
-            var _a;
             const { url, data } = msg.payload;
             try {
-                const client = (_a = nodeContext.get(TUYA_CLIENT)) !== null && _a !== void 0 ? _a : new class_1.TuyaApi({
+                const client = class_1.TuyaApi.getInstance({
                     clientId: conf.clientId,
                     secret: conf.secret,
                     schema: conf.schema,
