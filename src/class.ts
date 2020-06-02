@@ -182,6 +182,8 @@ export class TuyaApi {
         console.log('getAndRefreshToken');
 
         return this.writeLock(this.tokenLock, async () => {
+            console.log('refresh token');
+
             let resp = await this.#client.get('token?grant_type=1').json<ITuyaApiResponse>();
             this.setTokenData(resp);
 

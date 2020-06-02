@@ -113,6 +113,7 @@ class TuyaApi {
             return;
         console.log('getAndRefreshToken');
         return this.writeLock(this.tokenLock, async () => {
+            console.log('refresh token');
             let resp = await __classPrivateFieldGet(this, _client).get('token?grant_type=1').json();
             this.setTokenData(resp);
             if (this.isTokenExpired()) {
