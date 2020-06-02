@@ -17,5 +17,6 @@ config();
         client.getAndRefreshToken(),
         client.get(`devices/20100800bcddc2aed93b/status`),
         client.get(`devices/20100800bcddc2aed93b/status`),
+        client.post(`devices/20100800bcddc2aed93b/commands`, {}),
     ])
 })().catch(console.error);

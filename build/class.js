@@ -65,7 +65,7 @@ class TuyaApi {
                         const body = response.body;
                         if (!body.success) {
                             if (!isTokenUrl && body.code === 1010) {
-                                await this.getAndRefreshToken();
+                                this.tokenExpiresAt = new Date();
                                 return retryWithMergedOptions(__classPrivateFieldGet(this, _client).defaults.options);
                             }
                             throw new TuyaApiError(body.code, body.msg, body.t);
@@ -82,7 +82,7 @@ class TuyaApi {
         const isTokenUrl = options.url.toString().includes('token');
         if (!isTokenUrl) {
             await this.readLock(this.tokenLock, async () => {
-                options.headers.access_token = this.tokenAccess + 1;
+                options.headers.access_token = this.tokenAccess;
             });
         }
         const timestamp = new Date().getTime();

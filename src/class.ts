@@ -121,7 +121,7 @@ export class TuyaApi {
                     const body = response.body as ITuyaApiResponse;
                     if (!body.success) {
                         if (!isTokenUrl && body.code === 1010) {
-                            await this.getAndRefreshToken();
+                            this.tokenExpiresAt = new Date();
                             // Make a new retry
                             return retryWithMergedOptions(this.#client.defaults.options);
                         }
@@ -143,7 +143,7 @@ export class TuyaApi {
 
         if (!isTokenUrl) {
             await this.readLock(this.tokenLock, async () => {
-                options.headers.access_token = this.tokenAccess + 1;
+                options.headers.access_token = this.tokenAccess;
             });
         }
 
