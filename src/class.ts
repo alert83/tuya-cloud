@@ -100,7 +100,7 @@ export class TuyaApi {
             },
             hooks: {
                 beforeRequest: [async options => {
-                    console.log('beforeRequest:', options.url.toString());
+                    // console.log('beforeRequest:', options.url.toString());
 
                     const isTokenUrl = options.url.toString().includes('token');
 
@@ -114,7 +114,7 @@ export class TuyaApi {
                 }],
 
                 afterResponse: [async (response, retryWithMergedOptions) => {
-                    console.log('afterResponse', response.request.options.url.toString());
+                    // console.log('afterResponse', response.request.options.url.toString());
 
                     const isTokenUrl = response.request.options.url.toString().includes('token');
 
@@ -179,7 +179,7 @@ export class TuyaApi {
     async getAndRefreshToken() {
         if (this.tokenLock.isLocked === 'W') return;
 
-        console.log('getAndRefreshToken');
+        // console.log('getAndRefreshToken');
 
         return this.writeLock(this.tokenLock, async () => {
             console.log('refresh token');
@@ -197,7 +197,7 @@ export class TuyaApi {
     private async readLock(lock: any, fn: (...args: any[]) => Promise<any>) {
         return new Promise((resolve, reject) => {
             lock.readLock(() => {
-                console.log('Read Lock', lock.isLocked);
+                // console.log('Read Lock', lock.isLocked);
                 fn()
                     .then((res) => resolve(res))
                     .catch(reject)
@@ -209,7 +209,7 @@ export class TuyaApi {
     private async writeLock(lock: any, fn: (...args: any[]) => Promise<any>) {
         return new Promise((resolve, reject) => {
             lock.writeLock(() => {
-                console.log('Write Lock', lock.isLocked);
+                // console.log('Write Lock', lock.isLocked);
                 fn()
                     .then((res) => resolve(res))
                     .catch(reject)
