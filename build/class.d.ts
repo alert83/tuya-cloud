@@ -12,12 +12,8 @@ export declare class TuyaApi {
     tokenAccess: string;
     tokenRefresh: string;
     tokenExpiresAt: Date;
-    private static instance;
-    static rwStaticLock: any;
-    private rwLock;
-    protected constructor(options: ITuyaApiOptions);
-    static getInstance(options: ITuyaApiOptions): TuyaApi;
-    getCredsHash(): string;
+    private tokenLock;
+    constructor(options: ITuyaApiOptions);
     private buildClient;
     private buildHeaders;
     isTokenExpired(): boolean;
@@ -27,9 +23,9 @@ export declare class TuyaApi {
         tokenRefresh: string;
         tokenExpiresAt: string;
     };
-    getToken(): Promise<unknown>;
-    refreshToken(): Promise<unknown>;
     getAndRefreshToken(): Promise<unknown>;
+    private readLock;
+    private writeLock;
     private setTokenData;
     get(uri: any): Promise<unknown>;
     post(uri: any, data: any): Promise<unknown>;

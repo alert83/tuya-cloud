@@ -34,12 +34,13 @@ export class TuyaApi {
 
     #client: Got;
 
-    private static instance: TuyaApi | undefined;
+    // private static instance: TuyaApi | undefined;
 
-    static rwStaticLock = createReadWriteLock();
-    private rwLock = createReadWriteLock();
+    // static rwStaticLock = createReadWriteLock();
+    // private requestLock = createReadWriteLock();
+    private tokenLock = createReadWriteLock();
 
-    protected constructor(options: ITuyaApiOptions) {
+    constructor(options: ITuyaApiOptions) {
         this.#clientId = options.clientId;
         this.#secret = options.secret;
         this.#schema = options.schema;
@@ -54,33 +55,40 @@ export class TuyaApi {
         this.buildClient();
     }
 
-    static getInstance(options: ITuyaApiOptions) {
-        if (!this.instance) {
-            this.instance = new TuyaApi(options);
-        } else {
-            const newCred = JSON.stringify({
-                clientId: options.clientId,
-                secret: options.secret,
-                schema: options.schema,
-                region: options.region ?? 'eu',
-            });
-            const oldCred = this.instance.getCredsHash();
+    // static getInstance(options: ITuyaApiOptions) {
+    //     // this.rwStaticLock.readLock(() => {
+    //     if (!this.instance) {
+    //         this.rwStaticLock.writeLock(() => {
+    //             console.log('Write Static Lock');
+    //             this.instance = new TuyaApi(options);
+    //             this.rwStaticLock.unlock();
+    //         });
+    //     } else {
+    //         const isNewCreds = this.instance?.isNewCreds(options);
+    //
+    //     }
+    //
+    //     // this.rwStaticLock.unlock();
+    //     return this.instance;
+    //     // });
+    // }
 
-            if (newCred !== oldCred)
-                this.instance = new TuyaApi(options);
-        }
-
-        return this.instance;
-    }
-
-    getCredsHash() {
-        return JSON.stringify({
-            clientId: this.#clientId,
-            secret: this.#secret,
-            schema: this.#schema,
-            region: this.region,
-        });
-    }
+    // isNewCreds(options: ITuyaApiOptions) {
+    //     const oldCred = JSON.stringify({
+    //         clientId: this.#clientId,
+    //         secret: this.#secret,
+    //         schema: this.#schema,
+    //         region: this.region,
+    //     });
+    //     const newCred = JSON.stringify({
+    //         clientId: options.clientId,
+    //         secret: options.secret,
+    //         schema: options.schema,
+    //         region: options.region ?? 'eu',
+    //     });
+    //
+    //     return newCred !== oldCred;
+    // }
 
     private buildClient() {
         this.#client = got.extend({
@@ -112,7 +120,12 @@ export class TuyaApi {
 
                     const body = response.body as ITuyaApiResponse;
                     if (!body.success) {
-                        console.log(body);
+                        if (!isTokenUrl && body.code === 1010) {
+                            await this.getAndRefreshToken();
+                            // Make a new retry
+                            return retryWithMergedOptions(this.#client.defaults.options);
+                        }
+
                         throw new TuyaApiError(body.code, body.msg, body.t);
                     }
                     return response;
@@ -129,20 +142,8 @@ export class TuyaApi {
         const isTokenUrl = options.url.toString().includes('token');
 
         if (!isTokenUrl) {
-            await new Promise((resolve, reject) => {
-                this.rwLock.readLock(() => {
-                    console.log('Read Lock');
-
-                    setTimeout(() => {
-                        (async () => {
-                            options.headers.access_token = this.tokenAccess;
-                            resolve();
-                        })()
-                            .catch(reject)
-                            .finally(() => this.rwLock.unlock())
-                        ;
-                    }, 0);
-                });
+            await this.readLock(this.tokenLock, async () => {
+                options.headers.access_token = this.tokenAccess + 1;
             });
         }
 
@@ -175,81 +176,42 @@ export class TuyaApi {
         }
     }
 
-    async getToken() {
-        console.log('getToken');
-
-        return new Promise((resolve, reject) => {
-            if (this.rwLock.isLocked === 'W')
-                return resolve();
-
-            this.rwLock.writeLock(() => {
-                console.log('Write Lock');
-
-                this.#client
-                    .get('token?grant_type=1')
-                    .json<ITuyaApiResponse>()
-                    .then((resp) => {
-                        this.setTokenData(resp);
-                        resolve(resp);
-                    })
-                    .catch(reject)
-                    .finally(() => this.rwLock.unlock())
-                ;
-
-            });
-        });
-    }
-
-    async refreshToken() {
-        console.log('refreshToken');
-
-        return new Promise((resolve, reject) => {
-            if (this.rwLock.isLocked === 'W')
-                return resolve();
-
-            this.rwLock.writeLock(() => {
-                console.log('Write Lock');
-
-                this.#client
-                    .get(`token/${this.tokenRefresh}`)
-                    .json<ITuyaApiResponse>()
-                    .then((resp) => {
-                        this.setTokenData(resp);
-                        resolve(resp);
-                    })
-                    .catch(reject)
-                    .finally(() => this.rwLock.unlock())
-                ;
-            });
-        });
-    }
-
     async getAndRefreshToken() {
+        if (this.tokenLock.isLocked === 'W') return;
+
         console.log('getAndRefreshToken');
 
-        if (this.rwLock.isLocked === 'W') return;
+        return this.writeLock(this.tokenLock, async () => {
+            let resp = await this.#client.get('token?grant_type=1').json<ITuyaApiResponse>();
+            this.setTokenData(resp);
 
+            if (this.isTokenExpired()) {
+                resp = await this.#client.get(`token/${this.tokenRefresh}`).json<ITuyaApiResponse>();
+                this.setTokenData(resp);
+            }
+        });
+    }
+
+    private async readLock(lock: any, fn: (...args: any[]) => Promise<any>) {
         return new Promise((resolve, reject) => {
-            this.rwLock.writeLock(() => {
-                console.log('Write Lock', this.rwLock.isLocked);
+            lock.readLock(() => {
+                console.log('Read Lock', lock.isLocked);
+                fn()
+                    .then((res) => resolve(res))
+                    .catch(reject)
+                    .finally(() => lock.unlock())
+            });
+        });
+    }
 
-                setTimeout(() => {
-                    (async () => {
-                        let resp = await this.#client.get('token?grant_type=1').json<ITuyaApiResponse>();
-                        this.setTokenData(resp);
-
-                        if (this.isTokenExpired()) {
-                            resp = await this.#client.get(`token/${this.tokenRefresh}`).json<ITuyaApiResponse>();
-                            this.setTokenData(resp);
-                        }
-
-                        resolve(resp);
-                    })()
-                        .catch(reject)
-                        .finally(() => this.rwLock.unlock())
-                    ;
-
-                }, 0);
+    private async writeLock(lock: any, fn: (...args: any[]) => Promise<any>) {
+        return new Promise((resolve, reject) => {
+            lock.writeLock(() => {
+                console.log('Write Lock', lock.isLocked);
+                fn()
+                    .then((res) => resolve(res))
+                    .catch(reject)
+                    .finally(() => lock.unlock())
             });
         });
     }

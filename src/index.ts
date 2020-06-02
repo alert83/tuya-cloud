@@ -1,6 +1,8 @@
 import {TuyaApi} from "./class";
 import {isEmpty} from "lodash";
 
+const TUYA_CLIENT = '1b57711f-10b0-4b42-be96-54313e33b75c';
+
 module.exports = (RED) => {
     function configuration(config) {
         RED.nodes.createNode(this, config);
@@ -19,6 +21,7 @@ module.exports = (RED) => {
         RED.nodes.createNode(this, config);
         const node = this;
         const conf = RED.nodes.getNode(config.config);
+        const nodeContext = this.context();
         // const globalContext = this.context().global;
 
         // console.dir({ conf: Object.keys(conf) }, {color: true});
@@ -32,7 +35,7 @@ module.exports = (RED) => {
             const {url, data} = msg.payload;
 
             try {
-                const client = TuyaApi.getInstance({
+                const client = nodeContext.get(TUYA_CLIENT) ?? new TuyaApi({
                     clientId: conf.clientId,
                     secret: conf.secret,
                     schema: conf.schema,
@@ -75,12 +78,13 @@ module.exports = (RED) => {
         RED.nodes.createNode(this, config);
         const node = this;
         const conf = RED.nodes.getNode(config.config);
+        const nodeContext = this.context();
 
         node.on('input', async (msg, send, done) => {
             const {url, data} = msg.payload;
 
             try {
-                const client = TuyaApi.getInstance({
+                const client = nodeContext.get(TUYA_CLIENT) ?? new TuyaApi({
                     clientId: conf.clientId,
                     secret: conf.secret,
                     schema: conf.schema,

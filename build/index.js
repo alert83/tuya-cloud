@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const class_1 = require("./class");
 const lodash_1 = require("lodash");
+const TUYA_CLIENT = '1b57711f-10b0-4b42-be96-54313e33b75c';
 module.exports = (RED) => {
     function configuration(config) {
         RED.nodes.createNode(this, config);
@@ -16,10 +17,12 @@ module.exports = (RED) => {
         RED.nodes.createNode(this, config);
         const node = this;
         const conf = RED.nodes.getNode(config.config);
+        const nodeContext = this.context();
         node.on('input', async (msg, send, done) => {
+            var _a;
             const { url, data } = msg.payload;
             try {
-                const client = class_1.TuyaApi.getInstance({
+                const client = (_a = nodeContext.get(TUYA_CLIENT)) !== null && _a !== void 0 ? _a : new class_1.TuyaApi({
                     clientId: conf.clientId,
                     secret: conf.secret,
                     schema: conf.schema,
@@ -55,10 +58,12 @@ module.exports = (RED) => {
         RED.nodes.createNode(this, config);
         const node = this;
         const conf = RED.nodes.getNode(config.config);
+        const nodeContext = this.context();
         node.on('input', async (msg, send, done) => {
+            var _a;
             const { url, data } = msg.payload;
             try {
-                const client = class_1.TuyaApi.getInstance({
+                const client = (_a = nodeContext.get(TUYA_CLIENT)) !== null && _a !== void 0 ? _a : new class_1.TuyaApi({
                     clientId: conf.clientId,
                     secret: conf.secret,
                     schema: conf.schema,
