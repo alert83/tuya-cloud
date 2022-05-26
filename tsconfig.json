@@ -14,7 +14,7 @@
     "module": "commonjs",
     "moduleResolution": "node",
     "target": "es2017",
-    "declaration": true,
+    "declaration": false,
     "typeRoots": [
       "node_modules/@types"
     ],
