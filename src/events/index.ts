@@ -57,6 +57,10 @@ class TuyaMessageSubscribeWebsocket {
     this.server = this._connect();
   }
 
+  public stop() {
+    this.server?.terminate();
+  }
+
   public open(cb: (ws: WebSocket) => void) {
     this.event.on(TuyaMessageSubscribeWebsocket.open, cb);
   }

@@ -125,61 +125,66 @@ module.exports = (RED) => {
         const conf = RED.nodes.getNode(config.config);
         // const nodeContext = this.context();
 
-        node.on('input', async (msg) => {
-
-            const client = new TuyaMessageSubscribeWebsocket({
-                accessId: conf.clientId,
-                accessKey: conf.secret,
-                url: TuyaMessageSubscribeWebsocket.URL.EU,
-                env: TuyaMessageSubscribeWebsocket.env.TEST,
-                maxRetryTimes: 100,
-            });
-
-            client.open(() => {
-                console.log('open');
-                node.status({fill: "green", shape: "dot", text: 'open'});
-            });
-
-            client.message((ws, message) => {
-                client.ackMessage(message.messageId);
-                // console.log('message');
-                // console.dir(message, {depth: 10});
-
-                msg.payload = message;
-                node.send(msg);
-
-                node.status({fill: "blue", shape: "dot", text: 'message'});
-            });
-
-            client.reconnect(() => {
-                console.log('reconnect');
-                node.status({fill: "green", shape: "dot", text: 'reconnect'});
-            });
-
-            client.ping(() => {
-                console.log('ping');
-                node.status({fill: "blue", shape: "dot", text: 'ping'});
-            });
-
-            client.pong(() => {
-                console.log('pong');
-                node.status({fill: "blue", shape: "dot", text: 'pong'});
-            });
-
-            client.close((ws, ...args) => {
-                console.log('close', ...args);
-                node.status({fill: "red", shape: "dot", text: 'close'});
-            });
-
-            client.error((ws, error) => {
-                console.log('error', error);
-                node.status({fill: "red", shape: "dot", text: 'error: ' + error});
-            });
-
-            client.start();
-            node.status({fill: "gray", shape: "dot", text: 'start'});
+        const client = new TuyaMessageSubscribeWebsocket({
+            accessId: conf.clientId,
+            accessKey: conf.secret,
+            url: TuyaMessageSubscribeWebsocket.URL.EU,
+            env: TuyaMessageSubscribeWebsocket.env.TEST,
+            maxRetryTimes: 100,
         });
 
+        client.open(() => {
+            console.log('open');
+            node.status({fill: "green", shape: "dot", text: 'open'});
+        });
+
+        client.message((ws, message) => {
+            client.ackMessage(message.messageId);
+            // console.log('message');
+            // console.dir(message, {depth: 10});
+
+            node.send({payload: message.payload});
+
+            node.status({fill: "blue", shape: "dot", text: 'message'});
+        });
+
+        client.reconnect(() => {
+            // console.log('reconnect');
+            node.status({fill: "green", shape: "dot", text: 'reconnect'});
+        });
+
+        client.ping(() => {
+            // console.log('ping');
+            node.status({fill: "blue", shape: "dot", text: 'ping'});
+        });
+
+        client.pong(() => {
+            // console.log('pong');
+            node.status({fill: "blue", shape: "dot", text: 'pong'});
+        });
+
+        client.close((ws, ...args) => {
+            // console.log('close', ...args);
+            node.status({fill: "red", shape: "ring", text: 'close'});
+        });
+
+        client.error((ws, error) => {
+            // console.log('error', error);
+            node.status({fill: "red", shape: "ring", text: 'error: ' + error});
+        });
+
+        node.tuyaWsClient = client;
+
+        node.on('input', async (msg) => {
+            node.tuyaWsClient.start();
+            node.status({fill: "gray", shape: "dot", text: 'start...'});
+        });
+
+        node.on('close', function (done) {
+            node.tuyaWsClient.stop();
+            node.status({fill: "gray", shape: "ring", text: 'stop...'});
+            done();
+        });
     }
 
     RED.nodes.registerType('tuya-cloud-events', events);
