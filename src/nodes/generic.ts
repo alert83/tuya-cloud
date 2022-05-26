@@ -67,6 +67,8 @@ module.exports = (RED) => {
         let payload = msg.payload;
         let data = msg.payload.data;
 
+        node.log(123);
+
         if (!node.deviceId) {
             node.send({payload})
         } else if (data.devId === node.deviceId) {

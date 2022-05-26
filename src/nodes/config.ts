@@ -80,7 +80,7 @@ module.exports = (RED) => {
         node.status({fill: "gray", shape: "dot", text: 'start...'});
 
         //listen for node close onMessage and free socket
-        node.on('close', function () {
+        node.on('close', () => {
             try {
                 node.pulsarClient.stop();
 

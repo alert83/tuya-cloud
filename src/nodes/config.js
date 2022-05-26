@@ -58,7 +58,7 @@ module.exports = (RED) => {
         });
         client.start();
         node.status({ fill: "gray", shape: "dot", text: 'start...' });
-        node.on('close', function () {
+        node.on('close', () => {
             try {
                 node.pulsarClient.stop();
                 node.emit('pulsarClosed');

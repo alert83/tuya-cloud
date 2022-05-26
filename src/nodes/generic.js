@@ -30,6 +30,7 @@ module.exports = (RED) => {
         let msg = Object.assign({}, input);
         let payload = msg.payload;
         let data = msg.payload.data;
+        node.log(123);
         if (!node.deviceId) {
             node.send({ payload });
         }
