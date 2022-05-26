@@ -5,7 +5,7 @@ const sourceFiles = ['./src/index.html'];
 const destination = './build/';
 
 gulp.task('clean', function(){
-  return del(destination + '/**', {force:true});
+  return del(destination + '**', {force:true});
 });
 
 gulp.task('copy', function () {

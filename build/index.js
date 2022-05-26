@@ -27,7 +27,7 @@ module.exports = (RED) => {
                     region: conf.region,
                     handleToken: true,
                 });
-                if ((0, lodash_1.isEmpty)(data)) {
+                if (lodash_1.isEmpty(data)) {
                     msg.payload = await client.get(url);
                 }
                 else {

@@ -1,6 +1,5 @@
-import got, {Got} from "got";
+import got, {Got, NormalizedOptions} from "got";
 import {createHmac} from "crypto";
-import Options from "got/dist/source/core/options";
 import {isEmpty} from "lodash";
 import {createReadWriteLock} from "locks";
 
@@ -119,14 +118,14 @@ export class TuyaApi {
                     return response;
                 }],
 
-                beforeRetry: [async (error, retryCount) => {
+                beforeRetry: [async (options, error, retryCount) => {
                     console.log('beforeRetry', error?.code);
                 }]
             }
         });
     }
 
-    private async buildHeaders(options: Options) {
+    private async buildHeaders(options: NormalizedOptions) {
         const isTokenUrl = options?.url?.toString().includes('token');
 
         if (!isTokenUrl) {
