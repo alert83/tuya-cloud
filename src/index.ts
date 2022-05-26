@@ -144,6 +144,9 @@ module.exports = (RED) => {
                 // console.log('message');
                 // console.dir(message, {depth: 10});
 
+                msg.payload = message;
+                node.send(msg);
+
                 node.status({fill: "blue", shape: "dot", text: 'message'});
             });
 
@@ -174,8 +177,6 @@ module.exports = (RED) => {
 
             client.start();
             node.status({fill: "gray", shape: "dot", text: 'start'});
-
-            node.send(msg);
         });
 
     }
