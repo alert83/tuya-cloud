@@ -73,68 +73,24 @@ module.exports = (RED) => {
 
     //
 
-    function token(config) {
-        RED.nodes.createNode(this, config);
-        const node = this;
-        const conf = RED.nodes.getNode(config.config);
-        const nodeContext = this.context();
-
-        node.on('input', async (msg, send, done) => {
-            const {url, data} = msg.payload;
-
-            try {
-                const client = TuyaApi.getInstance({
-                    clientId: conf.clientId,
-                    secret: conf.secret,
-                    schema: conf.schema,
-                    region: conf.region,
-                    handleToken: true,
-                });
-
-                msg.payload = await client.getAndRefreshToken();
-
-                // tslint:disable-next-line:only-arrow-functions
-                send = send || function () {
-                    node.send.apply(node, arguments);
-                };
-                send(msg);
-
-                if (done) done();
-            } catch (e) {
-                const err = `Error Requesting: ${JSON.stringify([e.code, e.message])}`
-
-                if (done) {
-                    // Node-RED 1.0 compatible
-                    done(err);
-                } else {
-                    // Node-RED 0.x compatible
-                    node.error(err, msg);
-                }
-            }
-        });
-
-    }
-
-    RED.nodes.registerType('tuya-cloud-api-token', token);
-
-    //
-
     function events(config) {
-        RED.nodes.createNode(this, config);
         const node = this;
+        RED.nodes.createNode(node, config);
+        node.name = config.name;
+        node.pulsarEnv = config.pulsarEnv;
+
         const conf = RED.nodes.getNode(config.config);
-        // const nodeContext = this.context();
 
         const client = new TuyaMessageSubscribeWebsocket({
             accessId: conf.clientId,
             accessKey: conf.secret,
-            url: TuyaMessageSubscribeWebsocket.URL.EU,
-            env: TuyaMessageSubscribeWebsocket.env.TEST,
+            url: TuyaMessageSubscribeWebsocket.URL[conf.region],
+            env: node.pulsarEnv,
             maxRetryTimes: 100,
         });
 
         client.open(() => {
-            console.log('open');
+            // console.log('open');
             node.status({fill: "green", shape: "dot", text: 'open'});
         });
 
@@ -164,13 +120,14 @@ module.exports = (RED) => {
         });
 
         client.close((ws, ...args) => {
-            // console.log('close', ...args);
+            console.log('close', ...args);
             node.status({fill: "red", shape: "ring", text: 'close'});
         });
 
         client.error((ws, error) => {
-            // console.log('error', error);
+            console.log('error', error);
             node.status({fill: "red", shape: "ring", text: 'error: ' + error});
+            node.error(error);
         });
 
         node.tuyaWsClient = client;

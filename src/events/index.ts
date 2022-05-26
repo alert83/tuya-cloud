@@ -2,7 +2,7 @@
 import Event from 'events';
 import WebSocket from 'ws';
 
-import { TUYA_PASULAR_ENV, getTuyaEnvConfig, TuyaRegionConfigEnum } from './config';
+import { TUYA_PULSAR_ENV, getTuyaEnvConfig, TuyaRegionConfigEnum } from './config';
 import { getTopicUrl, buildQuery, buildPassword, decrypt } from './utils';
 
 type LoggerLevel = 'INFO' | 'ERROR';
@@ -10,7 +10,7 @@ type LoggerLevel = 'INFO' | 'ERROR';
 interface IConfig {
   accessId: string;
   accessKey: string;
-  env: TUYA_PASULAR_ENV;
+  env: TUYA_PULSAR_ENV;
   url: TuyaRegionConfigEnum;
 
   timeout?: number;
@@ -21,7 +21,7 @@ interface IConfig {
 
 class TuyaMessageSubscribeWebsocket {
   static URL = TuyaRegionConfigEnum;
-  static env = TUYA_PASULAR_ENV;
+  static env = TUYA_PULSAR_ENV;
 
   static data = 'TUTA_DATA';
   static error = 'TUYA_ERROR';

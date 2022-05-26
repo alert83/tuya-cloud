@@ -56,54 +56,20 @@ module.exports = (RED) => {
         });
     }
     RED.nodes.registerType('tuya-cloud-api-request', request);
-    function token(config) {
-        RED.nodes.createNode(this, config);
-        const node = this;
-        const conf = RED.nodes.getNode(config.config);
-        const nodeContext = this.context();
-        node.on('input', async (msg, send, done) => {
-            const { url, data } = msg.payload;
-            try {
-                const client = class_1.TuyaApi.getInstance({
-                    clientId: conf.clientId,
-                    secret: conf.secret,
-                    schema: conf.schema,
-                    region: conf.region,
-                    handleToken: true,
-                });
-                msg.payload = await client.getAndRefreshToken();
-                send = send || function () {
-                    node.send.apply(node, arguments);
-                };
-                send(msg);
-                if (done)
-                    done();
-            }
-            catch (e) {
-                const err = `Error Requesting: ${JSON.stringify([e.code, e.message])}`;
-                if (done) {
-                    done(err);
-                }
-                else {
-                    node.error(err, msg);
-                }
-            }
-        });
-    }
-    RED.nodes.registerType('tuya-cloud-api-token', token);
     function events(config) {
-        RED.nodes.createNode(this, config);
         const node = this;
+        RED.nodes.createNode(node, config);
+        node.name = config.name;
+        node.pulsarEnv = config.pulsarEnv;
         const conf = RED.nodes.getNode(config.config);
         const client = new events_1.default({
             accessId: conf.clientId,
             accessKey: conf.secret,
-            url: events_1.default.URL.EU,
-            env: events_1.default.env.TEST,
+            url: events_1.default.URL[conf.region],
+            env: node.pulsarEnv,
             maxRetryTimes: 100,
         });
         client.open(() => {
-            console.log('open');
             node.status({ fill: "green", shape: "dot", text: 'open' });
         });
         client.message((ws, message) => {
@@ -121,10 +87,13 @@ module.exports = (RED) => {
             node.status({ fill: "blue", shape: "dot", text: 'pong' });
         });
         client.close((ws, ...args) => {
+            console.log('close', ...args);
             node.status({ fill: "red", shape: "ring", text: 'close' });
         });
         client.error((ws, error) => {
+            console.log('error', error);
             node.status({ fill: "red", shape: "ring", text: 'error: ' + error });
+            node.error(error);
         });
         node.tuyaWsClient = client;
         node.on('input', async (msg) => {

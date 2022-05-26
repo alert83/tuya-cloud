@@ -161,7 +161,7 @@ class TuyaMessageSubscribeWebsocket {
     }
 }
 TuyaMessageSubscribeWebsocket.URL = config_1.TuyaRegionConfigEnum;
-TuyaMessageSubscribeWebsocket.env = config_1.TUYA_PASULAR_ENV;
+TuyaMessageSubscribeWebsocket.env = config_1.TUYA_PULSAR_ENV;
 TuyaMessageSubscribeWebsocket.data = 'TUTA_DATA';
 TuyaMessageSubscribeWebsocket.error = 'TUYA_ERROR';
 TuyaMessageSubscribeWebsocket.open = 'TUYA_OPEN';

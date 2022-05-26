@@ -30,29 +30,15 @@
         }
     });
 
-    RED.nodes.registerType('tuya-cloud-api-token', {
-        category: 'network',
-        color: '#FE4A1C',
-        defaults: {
-            name: {value: "Tuya Cloud API Token"},
-            config: {value: "", type: "tuya-cloud-api-configuration"},
-        },
-        inputs: 1,
-        outputs: 1,
-        icon: "white-globe.png",
-        label: function () {
-            return this.name || "Tuya Cloud API Token";
-        }
-    });
-
     RED.nodes.registerType('tuya-cloud-events', {
         category: 'network',
         color: '#FE4A1C',
         defaults: {
             name: {value: "Tuya Cloud Events"},
+            pulsarEnv: {value: "event", required: true},
             config: {value: "", type: "tuya-cloud-api-configuration"},
         },
-        inputs: 1,
+        inputs: 0,
         outputs: 1,
         icon: "white-globe.png",
         label: function () {
@@ -80,9 +66,12 @@
   <div class="form-row">
     <label for="node-config-input-region"><i class="icon-flag"></i> Region</label>
     <select id="node-config-input-region">
+      <option value="CN">China</option>
+      <option value="EU">Europe</option>
       <option value="AZ">America</option>
       <option value="AY">Asia</option>
-      <option value="EU">Europe</option>
+      <option value="US">USA</option>
+      <option value="IN">India</option>
     </select>
   </div>
 
@@ -163,41 +152,21 @@
 
 <!---->
 
-<script type="text/x-red" data-template-name="tuya-cloud-api-token">
-  <div class="form-row">
-    <label for="node-input-name"><i class="icon-tag"></i> Name</label>
-    <input type="text" id="node-input-name" placeholder="Name">
-
-    <label for="node-input-config"><i class="icon-tag"></i> Configuration</label>
-    <input type="text" id="node-input-config" placeholder="Credentials">
-  </div>
-</script>
-
-<script type="text/x-red" data-help-name="tuya-cloud-api-token">
-  <p>Tuya API Cloud Token</p>
-
-  <h3>Inputs</h3>
-  <dl class="message-properties">
-  </dl>
-
-  <h3>Outputs</h3>
-  <ol class="node-ports">
-    <li>Standard output
-      <dl class="message-properties">
-        <dt>payload <span class="property-type">object</span></dt>
-        <dd>the standard output of the command.</dd>
-      </dl>
-    </li>
-  </ol>
-</script>
-
-<!---->
-
 <script type="text/x-red" data-template-name="tuya-cloud-events">
   <div class="form-row">
     <label for="node-input-name"><i class="icon-tag"></i> Name</label>
     <input type="text" id="node-input-name" placeholder="Name">
+ </div>
 
+  <div class="form-row">
+    <label for="node-config-input-pulsarEnv"><i class="icon-env"></i> Pulsar Env</label>
+    <select id="node-config-input-pulsarEnv">
+      <option value="prod">Prod</option>
+      <option value="test">Test</option>
+    </select>
+  </div>
+
+  <div class="form-row">
     <label for="node-input-config"><i class="icon-tag"></i> Configuration</label>
     <input type="text" id="node-input-config" placeholder="Credentials">
   </div>
