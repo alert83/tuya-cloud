@@ -1,0 +1,85 @@
+<script type="text/javascript">
+    RED.nodes.registerType('tuya-cloud-api-config', {
+        category: 'config',
+        defaults: {
+            name: {value: ""},
+            clientId: {value: "", required: true},
+            secret: {value: "", required: true},
+            region: {value: "EU", required: true},
+            schema: {value: "", required: true},
+            pulsarEnv: {value: "test", required: true},
+        },
+        icon: "white-globe.png",
+        label: function () {
+            return this.name || "tuya-cloud-api-config";
+        },
+    });
+</script>
+
+<script type="text/x-red" data-template-name="tuya-cloud-api-config">
+  <div class="form-row">
+      <label for="node-config-input-name"><i class="icon-tag"></i> Name</label>
+      <input type="text" id="node-config-input-name" placeholder="Name">
+  </div>
+
+  <div class="form-row">
+      <label for="node-config-input-clientId"><i class="fa fa-key"></i> Client Id</label>
+      <input type="text" id="node-config-input-clientId" placeholder="Client Id">
+  </div>
+
+  <div class="form-row">
+    <label for="node-config-input-secret"><i class="fa fa-user-secret"></i> Secret</label>
+    <input type="password" id="node-config-input-secret" placeholder="Secret">
+  </div>
+
+  <div class="form-row">
+    <label for="node-config-input-region"><i class="icon-flag"></i> Region</label>
+    <select id="node-config-input-region">
+      <option value="CN">China</option>
+      <option value="EU">Europe</option>
+      <option value="AZ">America</option>
+      <option value="AY">Asia</option>
+      <option value="US">USA</option>
+      <option value="IN">India</option>
+    </select>
+  </div>
+
+  <div class="form-row">
+    <label for="node-config-input-schema"><i class="fa fa-schema"></i> Schema</label>
+    <input type="text" id="node-config-input-schema" placeholder="Schema">
+  </div>
+
+  <div class="form-row">
+    <label for="node-config-input-pulsarEnv"><i class="icon-env"></i> Pulsar Env</label>
+    <select id="node-config-input-pulsarEnv">
+      <option value="prod">Prod</option>
+      <option value="test">Test</option>
+    </select>
+  </div>
+</script>
+
+<script type="text/x-red" data-help-name="tuya-cloud-api-config">
+  <p>Tuya API Cloud Configuration</p>
+
+  <h3>Configuration Fields</h3>
+
+  <dl class="message-properties">
+    <dt>Name</dt>
+    <dd> Description of the configuration set </dd>
+
+    <dt>Client Id</dt>
+    <dd> Project API Client Id</a></dd>
+
+    <dt>Secret</dt>
+    <dd> Project API Secret</a></dd>
+
+    <dt>Region</dt>
+    <dd> Select the region for the account registered with TuyaSmart (Asia/America/Europe).</dd>
+
+    <dt>Schema</dt>
+    <dd> SDK Schema</dd>
+
+    <dt>Pulsar Env</dt>
+    <dd> Pulsar Env</dd>
+  </dl>
+</script>

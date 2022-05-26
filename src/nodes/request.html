@@ -1,0 +1,62 @@
+<script type="text/javascript">
+    RED.nodes.registerType('tuya-cloud-api-request', {
+        category: 'tuya',
+        color: '#FE4A1C',
+        defaults: {
+            config: {value: "", type: "tuya-cloud-api-config"},
+            name: {value: ""},
+        },
+        inputs: 1,
+        outputs: 1,
+        icon: "white-globe.png",
+        label: function () {
+            return this.name || "Tuya Cloud API Request";
+        }
+    });
+</script>
+
+<script type="text/x-red" data-template-name="tuya-cloud-api-request">
+  <div class="form-row">
+    <label for="node-input-config"><i class="icon-tag"></i> Configuration</label>
+    <input type="text" id="node-input-config" placeholder="Credentials">
+  </div>
+
+  <div class="form-row">
+    <label for="node-input-name"><i class="icon-tag"></i> Name</label>
+    <input type="text" id="node-input-name" placeholder="Name">
+  </div>
+</script>
+
+<script type="text/x-red" data-help-name="tuya-cloud-api-request">
+  <p>Tuya API Cloud Request</p>
+  <h3>Inputs</h3>
+  <dl class="message-properties">
+    <dt>payload<span class="property-type">object</span></dt>
+    <dd> Payload object consisting of the various properties: </dd>
+
+    <dt>payload.url <span class="property-type">string</span></dt>
+    <dd> url path</dd>
+
+    <dt class="optional">payload.data <span class="property-type">object</span></dt>
+    <dd> post data</dd>
+  </dl>
+
+  <h3>Outputs</h3>
+  <ol class="node-ports">
+    <li>Standard output
+      <dl class="message-properties">
+        <dt>payload <span class="property-type">object</span></dt>
+        <dd>the standard output of the command.</dd>
+      </dl>
+    </li>
+  </ol>
+
+<!--  <h3>Details</h3>-->
+<!--  <p><code>msg.payload</code> contains the parameters required for the Tuya API Cloud API. </p>-->
+
+<!--  <h3>References</h3>-->
+<!--  <ul>-->
+<!--    <li><a href="https://github.com/TuyaAPI/cloud">TuyaAPI Cloud NodeJS Wrapper docs</a> - The NodeJS library used by this project for talking to the Tuya Cloud API</li>-->
+<!--    <li><a href="https://docs.tuya.com/en/cloudapi/appAPI/index.html">Tuya Cloud API docs</a> - Official Tuya API documentation</li>-->
+<!--  </ul>-->
+</script>

@@ -25,14 +25,8 @@
       "es2020",
       "esnext"
     ],
-    "rootDir": "src",
-    "outDir": "build"
   },
-  "include": [
-    "src"
-  ],
   "exclude": [
     "node_modules/**",
-    "**/*.d.ts"
   ]
 }

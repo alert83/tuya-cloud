@@ -1,17 +1,15 @@
 {
   "name": "node-red-contrib-tuya-cloud-api",
-  "version": "1.6.0",
+  "version": "1.7.0",
   "description": "",
-  "main": "build/",
   "scripts": {
-    "build": "tsc",
-    "deploy": "gulp && tsc",
-    "example": "npm run build && node ./example/index.js"
+    "build": "tsc"
   },
   "node-red": {
     "nodes": {
-      "tuya-request": "build/index.js",
-      "tuya-events": "build/index.js"
+      "tuya-config": "src/nodes/config.js",
+      "tuya-generic": "src/nodes/generic.js",
+      "tuya-request": "src/nodes/request.js"
     }
   },
   "keywords": [
@@ -24,13 +22,11 @@
     "locks": "^0.2.2",
     "lodash": "^4.17.21",
     "crypto-js": "^4.1.1",
-    "ws": "^7.5.7"
+    "ws": "^8.7.0"
   },
   "devDependencies": {
-    "@types/lodash": "^4.14.154",
-    "@types/node": "^12.12.43",
-    "del": "^6.1.1",
-    "gulp": "^4.0.2",
-    "typescript": "^3.9.3"
+    "@types/lodash": "^4.14.182",
+    "@types/node": "^12.20.52",
+    "typescript": "^3.9.10"
   }
 }
