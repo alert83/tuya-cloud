@@ -1,5 +1,5 @@
 module.exports = (RED) => {
-    function RequestNode(config) {
+    function GenericNode(config) {
         RED.nodes.createNode(this, config);
         this.name = config.name;
         this.deviceId = config.deviceId;
@@ -17,7 +17,7 @@ module.exports = (RED) => {
             node.status({ fill: 'red', shape: 'ring', text: 'No gateway configured' });
         }
     }
-    RED.nodes.registerType('tuya-cloud-api-request', RequestNode);
+    RED.nodes.registerType('tuya-cloud-api-generic', GenericNode);
     function _onInput(node, msg) {
     }
     function _onClose(node) {
