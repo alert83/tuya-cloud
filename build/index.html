@@ -44,6 +44,21 @@
             return this.name || "Tuya Cloud API Token";
         }
     });
+
+    RED.nodes.registerType('tuya-cloud-events', {
+        category: 'network',
+        color: '#FE4A1C',
+        defaults: {
+            name: {value: "Tuya Cloud Events"},
+            config: {value: "", type: "tuya-cloud-api-configuration"},
+        },
+        inputs: 0,
+        outputs: 1,
+        icon: "white-globe.png",
+        label: function () {
+            return this.name || "Tuya Cloud Events";
+        }
+    });
 </script>
 
 <script type="text/x-red" data-template-name="tuya-cloud-api-configuration">
@@ -100,6 +115,8 @@
 
 </script>
 
+<!---->
+
 <script type="text/x-red" data-template-name="tuya-cloud-api-request">
   <div class="form-row">
     <label for="node-input-name"><i class="icon-tag"></i> Name</label>
@@ -144,6 +161,8 @@
 <!--  </ul>-->
 </script>
 
+<!---->
+
 <script type="text/x-red" data-template-name="tuya-cloud-api-token">
   <div class="form-row">
     <label for="node-input-name"><i class="icon-tag"></i> Name</label>
@@ -156,6 +175,36 @@
 
 <script type="text/x-red" data-help-name="tuya-cloud-api-token">
   <p>Tuya API Cloud Token</p>
+
+  <h3>Inputs</h3>
+  <dl class="message-properties">
+  </dl>
+
+  <h3>Outputs</h3>
+  <ol class="node-ports">
+    <li>Standard output
+      <dl class="message-properties">
+        <dt>payload <span class="property-type">object</span></dt>
+        <dd>the standard output of the command.</dd>
+      </dl>
+    </li>
+  </ol>
+</script>
+
+<!---->
+
+<script type="text/x-red" data-template-name="tuya-cloud-events">
+  <div class="form-row">
+    <label for="node-input-name"><i class="icon-tag"></i> Name</label>
+    <input type="text" id="node-input-name" placeholder="Name">
+
+    <label for="node-input-config"><i class="icon-tag"></i> Configuration</label>
+    <input type="text" id="node-input-config" placeholder="Credentials">
+  </div>
+</script>
+
+<script type="text/x-red" data-help-name="tuya-cloud-events">
+  <p>Tuya Cloud Events</p>
 
   <h3>Inputs</h3>
   <dl class="message-properties">

@@ -2,7 +2,6 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const class_1 = require("./class");
 const lodash_1 = require("lodash");
-const TUYA_CLIENT = '1b57711f-10b0-4b42-be96-54313e33b75c';
 module.exports = (RED) => {
     function configuration(config) {
         RED.nodes.createNode(this, config);
@@ -28,7 +27,7 @@ module.exports = (RED) => {
                     region: conf.region,
                     handleToken: true,
                 });
-                if (lodash_1.isEmpty(data)) {
+                if ((0, lodash_1.isEmpty)(data)) {
                     msg.payload = await client.get(url);
                 }
                 else {
@@ -88,4 +87,14 @@ module.exports = (RED) => {
         });
     }
     RED.nodes.registerType('tuya-cloud-api-token', token);
+    function events(config) {
+        RED.nodes.createNode(this, config);
+        const node = this;
+        const conf = RED.nodes.getNode(config.config);
+        const nodeContext = this.context();
+        node.on('input', async (msg, send, done) => {
+            const { url, data } = msg.payload;
+        });
+    }
+    RED.nodes.registerType('tuya-cloud-events', events);
 };

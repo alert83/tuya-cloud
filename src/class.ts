@@ -1,8 +1,7 @@
-// tslint:disable:max-classes-per-file
 import got, {Got} from "got";
 import {createHmac} from "crypto";
+import Options from "got/dist/source/core/options";
 import {isEmpty} from "lodash";
-import {NormalizedOptions as RequestNormalizedOptions} from "got/dist/source/core";
 import {createReadWriteLock} from "locks";
 
 interface ITuyaApiOptions {
@@ -91,7 +90,7 @@ export class TuyaApi {
                 beforeRequest: [async options => {
                     // console.log('beforeRequest:', options.url.toString());
 
-                    const isTokenUrl = options.url.toString().includes('token');
+                    const isTokenUrl = options?.url?.toString().includes('token');
 
                     if (!isTokenUrl && this.handleToken) {
                         if (isEmpty(this.tokenAccess) || this.isTokenExpired()) {
@@ -105,7 +104,7 @@ export class TuyaApi {
                 afterResponse: [async (response, retryWithMergedOptions) => {
                     // console.log('afterResponse', response.request.options.url.toString());
 
-                    const isTokenUrl = response.request.options.url.toString().includes('token');
+                    const isTokenUrl = response.request.options?.url?.toString().includes('token');
 
                     const body = response.body as ITuyaApiResponse;
                     if (!body.success) {
@@ -120,15 +119,15 @@ export class TuyaApi {
                     return response;
                 }],
 
-                beforeRetry: [async (options, error, retryCount) => {
+                beforeRetry: [async (error, retryCount) => {
                     console.log('beforeRetry', error?.code);
                 }]
             }
         });
     }
 
-    private async buildHeaders(options: RequestNormalizedOptions) {
-        const isTokenUrl = options.url.toString().includes('token');
+    private async buildHeaders(options: Options) {
+        const isTokenUrl = options?.url?.toString().includes('token');
 
         if (!isTokenUrl) {
             await this.readLock(this.tokenLock, async () => {
