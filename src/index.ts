@@ -125,15 +125,16 @@ module.exports = (RED) => {
         const conf = RED.nodes.getNode(config.config);
         // const nodeContext = this.context();
 
-        const client = new TuyaMessageSubscribeWebsocket({
-            accessId: conf.clientId,
-            accessKey: conf.secret,
-            url: TuyaMessageSubscribeWebsocket.URL.EU,
-            env: TuyaMessageSubscribeWebsocket.env.TEST,
-            maxRetryTimes: 100,
-        });
-
         node.on('input', async (msg) => {
+
+            const client = new TuyaMessageSubscribeWebsocket({
+                accessId: conf.clientId,
+                accessKey: conf.secret,
+                url: TuyaMessageSubscribeWebsocket.URL.EU,
+                env: TuyaMessageSubscribeWebsocket.env.TEST,
+                maxRetryTimes: 100,
+            });
+
             client.open(() => {
                 console.log('open');
                 node.status({fill: "green", shape: "dot", text: 'open'});

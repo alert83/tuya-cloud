@@ -95,14 +95,14 @@ module.exports = (RED) => {
         RED.nodes.createNode(this, config);
         const node = this;
         const conf = RED.nodes.getNode(config.config);
-        const client = new events_1.default({
-            accessId: conf.clientId,
-            accessKey: conf.secret,
-            url: events_1.default.URL.EU,
-            env: events_1.default.env.TEST,
-            maxRetryTimes: 100,
-        });
         node.on('input', async (msg) => {
+            const client = new events_1.default({
+                accessId: conf.clientId,
+                accessKey: conf.secret,
+                url: events_1.default.URL.EU,
+                env: events_1.default.env.TEST,
+                maxRetryTimes: 100,
+            });
             client.open(() => {
                 console.log('open');
                 node.status({ fill: "green", shape: "dot", text: 'open' });

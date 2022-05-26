@@ -5,7 +5,8 @@
   "main": "build/",
   "scripts": {
     "build": "tsc",
-    "deploy": "gulp && tsc"
+    "deploy": "gulp && tsc",
+    "example": "npm run build && node ./example/index.js"
   },
   "node-red": {
     "nodes": {
