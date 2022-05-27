@@ -9,7 +9,7 @@ module.exports = (RED) => {
         this.deviceId = config.deviceId;
         this.gateway = gateway;
         const node = this;
-        node.status('');
+        node.status({});
         if (node.gateway) {
             node.gateway.on('event', (message) => _onEvent(node, message));
             node.gateway.on('pulsarReady', () => _onPulsarReady(node));

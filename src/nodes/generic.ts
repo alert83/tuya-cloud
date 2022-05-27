@@ -12,7 +12,7 @@ module.exports = (RED) => {
 
         const node = this;
 
-        node.status('');
+        node.status({});
 
         if (node.gateway) {
             node.gateway.on('event', (message) => _onEvent(node, message));
