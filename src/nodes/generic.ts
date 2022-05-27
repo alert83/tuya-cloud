@@ -1,15 +1,16 @@
+import {isEmpty} from "lodash";
+
 module.exports = (RED) => {
 
     function GenericNode(config) {
+        const gateway = RED.nodes.getNode(config.config);
+
         RED.nodes.createNode(this, config);
         this.name = config.name;
         this.deviceId = config.deviceId;
+        this.gateway = gateway;
 
         const node = this;
-
-        const gateway = RED.nodes.getNode(config.config);
-
-        node.gateway = gateway;
 
         if (node.gateway) {
             node.gateway.on('event', (input) => _onEvent(node, input));
@@ -67,12 +68,12 @@ module.exports = (RED) => {
         let payload = msg.payload;
         let data = msg.payload.data;
 
-        node.log(123);
+        node.log('node:', data);
 
-        if (!node.deviceId) {
-            node.send({payload})
+        if (isEmpty(node.deviceId)) {
+            node.send({payload});
         } else if (data.devId === node.deviceId) {
-            node.send({payload})
+            node.send({payload});
         }
     }
 };

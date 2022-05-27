@@ -4,13 +4,12 @@ import {TuyaApi} from "../classes/class";
 module.exports = (RED) => {
 
     function RequestNode(config) {
-        RED.nodes.createNode(this, config);
-
-        const node = this;
-
         const gateway = RED.nodes.getNode(config.config);
 
-        node.gateway = gateway;
+        RED.nodes.createNode(this, config);
+        this.gateway = gateway;
+
+        const node = this;
 
         //const nodeContext = this.context();
         // const globalContext = this.context().global;

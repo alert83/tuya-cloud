@@ -4,10 +4,10 @@ const lodash_1 = require("lodash");
 const class_1 = require("../classes/class");
 module.exports = (RED) => {
     function RequestNode(config) {
-        RED.nodes.createNode(this, config);
-        const node = this;
         const gateway = RED.nodes.getNode(config.config);
-        node.gateway = gateway;
+        RED.nodes.createNode(this, config);
+        this.gateway = gateway;
+        const node = this;
         node.on('input', async (msg, send, done) => {
             const { url, data } = msg.payload;
             try {
