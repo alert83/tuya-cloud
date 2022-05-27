@@ -10,7 +10,7 @@ module.exports = (RED) => {
         this.gateway = gateway;
         const node = this;
         if (node.gateway) {
-            node.gateway.on('event', (input) => _onEvent(node, input));
+            node.gateway.on('event', (message) => _onEvent(node, message));
             node.gateway.on('pulsarReady', () => _onPulsarReady(node));
             node.gateway.on('pulsarClosed', () => _onPulsarClosed(node));
             node.on('input', (msg) => _onInput(node, msg));
@@ -29,11 +29,11 @@ module.exports = (RED) => {
     }
     function _onPulsarClosed(node) {
     }
-    function _onEvent(node, input) {
-        let msg = Object.assign({}, input);
+    function _onEvent(node, message) {
+        let msg = Object.assign({}, message);
         let payload = msg.payload;
         let data = msg.payload.data;
-        node.log('node:', data);
+        console.log('node:', msg);
         if (lodash_1.isEmpty(node.deviceId)) {
             node.send({ payload });
         }
