@@ -12,6 +12,8 @@ module.exports = (RED) => {
 
         const node = this;
 
+        node.status('');
+
         if (node.gateway) {
             node.gateway.on('event', (message) => _onEvent(node, message));
             node.gateway.on('pulsarReady', () => _onPulsarReady(node));
@@ -57,10 +59,12 @@ module.exports = (RED) => {
         // this.timer = setInterval(() => {
         //     gateway.sendCommand(cmd);
         // }, this.readAskInterval);
+
+        node.status({fill: 'green', shape: 'dot', text: 'online'});
     }
 
     function _onPulsarClosed (node) {
-
+        node.status({fill: 'red', shape: 'ring', text: 'offline'});
     }
 
     function _onEvent (node, message) {

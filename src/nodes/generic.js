@@ -9,6 +9,7 @@ module.exports = (RED) => {
         this.deviceId = config.deviceId;
         this.gateway = gateway;
         const node = this;
+        node.status('');
         if (node.gateway) {
             node.gateway.on('event', (message) => _onEvent(node, message));
             node.gateway.on('pulsarReady', () => _onPulsarReady(node));
@@ -26,8 +27,10 @@ module.exports = (RED) => {
     function _onClose(node) {
     }
     function _onPulsarReady(node) {
+        node.status({ fill: 'green', shape: 'dot', text: 'online' });
     }
     function _onPulsarClosed(node) {
+        node.status({ fill: 'red', shape: 'ring', text: 'offline' });
     }
     function _onEvent(node, message) {
         let msg = Object.assign({}, message);
