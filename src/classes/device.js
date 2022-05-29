@@ -4,7 +4,6 @@ exports.Device = void 0;
 const lodash_1 = require("lodash");
 class Device {
     constructor(gateway, node, config) {
-        console.log('new node');
         this.node = node;
         this.node.gateway = gateway;
         this.node.name = config.name;

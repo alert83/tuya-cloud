@@ -43,6 +43,9 @@ module.exports = (RED) => {
                 return await node.httpClient.post(url, data);
             }
         };
+        node.getDevices = async () => {
+            return await node.httpClient.get('v1.0/iot-01/associated-users/devices?size=100');
+        };
         pulsarClient.open(() => {
             if (false === node.pulsarReady) {
                 node.emit('pulsarReady');

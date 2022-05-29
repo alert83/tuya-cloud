@@ -47,6 +47,11 @@ module.exports = (RED) => {
             }
         };
 
+        node.getDevices = async () => {
+            // 'https://openapi.tuyaeu.com/v1.0/iot-01/associated-users/devices?size=100'
+            return await node.httpClient.get('v1.0/iot-01/associated-users/devices?size=100');
+        }
+
         pulsarClient.open(() => {
             // console.log('open');
 
