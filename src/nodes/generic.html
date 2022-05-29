@@ -29,7 +29,7 @@
                     text: "Loading..."
                 }).appendTo('#node-input-deviceId');
 
-                console.log(111, confObj.token);
+                console.log(111, confObj);
 
                 $.getJSON('smartthings/' + confObj.token + '/devices/button', function (data) {
                     console.log("getDevs");
