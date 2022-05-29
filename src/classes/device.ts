@@ -2,37 +2,21 @@ import {isEmpty} from "lodash";
 
 export class Device {
     private node: any;
-    private options: any;
-    private fields: any;
-
     private pulsarOnline: boolean;
-    private persistence: any;
     private error: any;
 
-    private deviceId?: string;
-
-    constructor(gateway, node, config, options) {
+    constructor(gateway, node, config) {
         this.node = node;
         this.node.gateway = gateway;
         this.node.name = config.name;
         this.node.model = null;
 
-        this.options = options;
-        this.fields = options.persistence || [];
-
         this.pulsarOnline = false;
         this.error = undefined;
 
-        this.deviceId = this.node.credentials.deviceId;
         this.node.deviceDetails = undefined;
         this.node.deviceStatus = undefined;
         this.node.deviceOnline = false;
-
-        //save persistent fields
-        this.persistence = {};
-        this.fields.forEach((name) => {
-            this.persistence[name] = null;
-        });
 
         if (this.node.gateway) {
             this.node.gateway.on('event', (message) => this._onEvent(message));
@@ -42,20 +26,20 @@ export class Device {
             this.node.on('input', (msg) => this._onInput(msg));
             this.node.on('close', () => this._onClose());
 
-            if (!isEmpty(this.deviceId)) {
+            if (!isEmpty(this.node.credentials.deviceId)) {
                 void this._getDetails()
                     .catch((err) => this.error = err);
             }
+
+            //set node status
+            this._updateNodeStatus();
         } else {
             this.node.status({fill: 'red', shape: 'ring', text: 'No gateway configured'});
         }
-
-        //set node status
-        this._updateNodeStatus();
     }
 
     async _getDetails() {
-        const resp = await this.node.gateway.sendCommand({url: `v1.0/devices/${this.deviceId}`});
+        const resp = await this.node.gateway.sendCommand({url: `v1.0/devices/${this.node.credentials.deviceId}`});
         const {result} = resp;
         this.node.deviceDetails = result;
         this.node.deviceStatus = result.status;
@@ -64,7 +48,7 @@ export class Device {
         this._updateNodeStatus();
     }
 
-    async _onInput(msg) {
+    _onInput(msg) {
         // msg.payload = await node.gateway.sendCommand(msg.payload);
         this._updateNodeStatus();
     }
@@ -74,11 +58,15 @@ export class Device {
     }
 
     _onPulsarReady() {
+        console.log('node: _onPulsarReady');
+
         this.pulsarOnline = true;
         this._updateNodeStatus();
     }
 
     _onPulsarClosed() {
+        console.log('node: _onPulsarClosed');
+
         this.pulsarOnline = false;
         this._updateNodeStatus();
     }
@@ -126,7 +114,7 @@ export class Device {
         this.node.status({
             fill: this.pulsarOnline ? 'green' : 'grey',
             shape: this.pulsarOnline ? 'dot' : 'ring',
-            text: text.join('| '),
+            text: text.join(', '),
         });
     }
 }
