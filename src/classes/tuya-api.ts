@@ -6,7 +6,7 @@ import {Lock} from "./lock";
 interface ITuyaApiOptions {
     clientId: string,
     secret: string,
-    schema: string,
+    uid: string,
     region?: string,
     handleToken?: boolean,
 }
@@ -22,7 +22,7 @@ interface ITuyaApiResponse {
 export class TuyaApi {
     #clientId: string;
     #secret: string;
-    #schema: string;
+    #uid: string;
     #region: string;
 
     handleToken: boolean;
@@ -42,7 +42,7 @@ export class TuyaApi {
     protected constructor(options: ITuyaApiOptions) {
         this.#clientId = options.clientId;
         this.#secret = options.secret;
-        this.#schema = options.schema;
+        this.#uid = options.uid;
         this.#region = options.region ?? 'eu';
 
         this.handleToken = options.handleToken ?? true;
@@ -64,7 +64,7 @@ export class TuyaApi {
     private buildClient() {
         this.#client = got.extend({
             responseType: 'json',
-            prefixUrl: `https://openapi.tuya${this.#region}.com/v1.0/`,
+            prefixUrl: `https://openapi.tuya${this.#region}.com/`,
             headers: {
                 client_id: this.#clientId,
                 sign_method: 'HMAC-SHA256',

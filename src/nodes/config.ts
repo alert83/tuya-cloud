@@ -12,7 +12,7 @@ module.exports = (RED) => {
 
         const clientId = this.credentials.clientId;
         const secret = this.credentials.secret;
-        const schema = this.credentials.schema;
+        const uid = this.credentials.uid;
         const region = this.credentials.region;
 
         const node = this;
@@ -21,7 +21,7 @@ module.exports = (RED) => {
         const httpClient = TuyaApi.getInstance({
             clientId: clientId,
             secret: secret,
-            schema: schema,
+            uid: uid,
             region: region,
             handleToken: true,
         });
@@ -120,8 +120,8 @@ module.exports = (RED) => {
         credentials: {
             clientId: {type: "text"},
             secret: {type: "password"},
+            uid: {type: "text"},
             region: {type: "text"},
-            schema: {type: "text"},
         }
     });
 };
