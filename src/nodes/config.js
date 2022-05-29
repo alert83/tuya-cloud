@@ -18,15 +18,6 @@ module.exports = (RED) => {
         const schema = this.credentials.schema;
         const region = this.credentials.region;
         const node = this;
-        node.sendCommand = async (payload) => {
-            const { url, data } = payload;
-            if (lodash_1.isEmpty(data)) {
-                return await node.httpClient.get(url);
-            }
-            else {
-                return await node.httpClient.post(url, data);
-            }
-        };
         const httpClient = tuya_api_1.TuyaApi.getInstance({
             clientId: clientId,
             secret: secret,
@@ -43,6 +34,15 @@ module.exports = (RED) => {
             maxRetryTimes: 100,
         });
         node.pulsarClient = pulsarClient;
+        node.sendCommand = async (payload) => {
+            const { url, data } = payload;
+            if (lodash_1.isEmpty(data)) {
+                return await node.httpClient.get(url);
+            }
+            else {
+                return await node.httpClient.post(url, data);
+            }
+        };
         pulsarClient.open(() => {
             if (false === node.pulsarReady) {
                 node.emit('pulsarReady');

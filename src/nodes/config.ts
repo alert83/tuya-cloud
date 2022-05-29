@@ -17,15 +17,6 @@ module.exports = (RED) => {
 
         const node = this;
 
-        node.sendCommand = async (payload) => {
-            const {url, data} = payload;
-            if (isEmpty(data)) {
-                return await node.httpClient.get(url);
-            } else {
-                return await node.httpClient.post(url, data);
-            }
-        };
-
         //initialize connection
         const httpClient = TuyaApi.getInstance({
             clientId: clientId,
@@ -44,6 +35,17 @@ module.exports = (RED) => {
             maxRetryTimes: 100,
         });
         node.pulsarClient = pulsarClient;
+
+        //
+
+        node.sendCommand = async (payload) => {
+            const {url, data} = payload;
+            if (isEmpty(data)) {
+                return await node.httpClient.get(url);
+            } else {
+                return await node.httpClient.post(url, data);
+            }
+        };
 
         pulsarClient.open(() => {
             // console.log('open');

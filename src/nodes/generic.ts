@@ -3,12 +3,10 @@ import {isEmpty} from "lodash";
 module.exports = (RED) => {
 
     function GenericNode(config) {
-        const gateway = RED.nodes.getNode(config.config);
-
         RED.nodes.createNode(this, config);
+        this.gateway = RED.nodes.getNode(config.config);
         this.name = config.name;
         this.deviceId = config.deviceId;
-        this.gateway = gateway;
 
         const node = this;
 
