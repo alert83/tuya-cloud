@@ -4,6 +4,7 @@ import WebSocket from 'ws';
 
 import { TUYA_PULSAR_ENV, getTuyaEnvConfig, TuyaRegionConfigEnum } from './config';
 import { getTopicUrl, buildQuery, buildPassword, decrypt } from './utils';
+import { noop } from 'lodash';
 
 type LoggerLevel = 'INFO' | 'ERROR';
 
@@ -45,7 +46,7 @@ class TuyaMessageSubscribeWebsocket {
         retryTimeout: 1000,
         maxRetryTimes: 100,
         timeout: 30000,
-        logger: console.log,
+        logger: noop, //console.log,
       },
       config,
     );

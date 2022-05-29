@@ -18,6 +18,7 @@ const events_1 = __importDefault(require("events"));
 const ws_1 = __importDefault(require("ws"));
 const config_1 = require("./config");
 const utils_1 = require("./utils");
+const lodash_1 = require("lodash");
 class TuyaMessageSubscribeWebsocket {
     constructor(config) {
         this.config = Object.assign({
@@ -26,7 +27,7 @@ class TuyaMessageSubscribeWebsocket {
             retryTimeout: 1000,
             maxRetryTimes: 100,
             timeout: 30000,
-            logger: console.log,
+            logger: lodash_1.noop,
         }, config);
         this.event = new events_1.default();
         this.retryTimes = 0;
