@@ -6,7 +6,6 @@ module.exports = (RED) => {
         RED.nodes.createNode(this, config);
         this.gateway = RED.nodes.getNode(config.config);
         this.name = config.name;
-        this.deviceId = config.deviceId;
         const node = this;
         node.status({});
         if (node.gateway) {
@@ -20,7 +19,6 @@ module.exports = (RED) => {
             node.status({ fill: 'red', shape: 'ring', text: 'No gateway configured' });
         }
     }
-    RED.nodes.registerType('tuya-cloud-api-generic', GenericNode);
     function _onInput(node, msg) {
     }
     function _onClose(node) {
@@ -35,12 +33,18 @@ module.exports = (RED) => {
         let msg = Object.assign({}, message);
         let payload = msg.payload;
         let data = msg.payload.data;
+        const deviceId = node.credentials.deviceId;
         console.log('node:', msg);
-        if (lodash_1.isEmpty(node.deviceId)) {
+        if (lodash_1.isEmpty(deviceId)) {
             node.send({ payload });
         }
-        else if (data.devId === node.deviceId) {
+        else if (data.devId === deviceId) {
             node.send({ payload });
         }
     }
+    RED.nodes.registerType('tuya-cloud-api-generic', GenericNode, {
+        credentials: {
+            deviceId: { type: "text" },
+        }
+    });
 };

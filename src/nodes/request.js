@@ -2,6 +2,7 @@ module.exports = (RED) => {
     function RequestNode(config) {
         RED.nodes.createNode(this, config);
         this.gateway = RED.nodes.getNode(config.config);
+        this.name = config.name;
         const node = this;
         node.status({});
         if (node.gateway) {
