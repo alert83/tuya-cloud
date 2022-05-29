@@ -3,11 +3,13 @@
         category: 'config',
         defaults: {
             name: {value: ""},
-            clientId: {value: "", required: true},
-            secret: {value: "", required: true},
-            region: {value: "EU", required: true},
-            schema: {value: "", required: true},
             pulsarEnv: {value: "test", required: true},
+        },
+        credentials: {
+            clientId: {type:"text"},
+            secret: {type:"password"},
+            schema: {type:"text"},
+            region: {type:"text"},
         },
         icon: "white-globe.png",
         label: function () {
@@ -33,6 +35,11 @@
   </div>
 
   <div class="form-row">
+    <label for="node-config-input-schema"><i class="fa fa-schema"></i> Schema</label>
+    <input type="text" id="node-config-input-schema" placeholder="Schema">
+  </div>
+
+  <div class="form-row">
     <label for="node-config-input-region"><i class="icon-flag"></i> Region</label>
     <select id="node-config-input-region">
       <option value="CN">China</option>
@@ -42,11 +49,6 @@
       <option value="US">USA</option>
       <option value="IN">India</option>
     </select>
-  </div>
-
-  <div class="form-row">
-    <label for="node-config-input-schema"><i class="fa fa-schema"></i> Schema</label>
-    <input type="text" id="node-config-input-schema" placeholder="Schema">
   </div>
 
   <div class="form-row">

@@ -1,7 +1,7 @@
 import got, {Got, NormalizedOptions} from "got";
 import {createHmac} from "crypto";
 import {isEmpty} from "lodash";
-import {createReadWriteLock} from "locks";
+import {Lock} from "./lock";
 
 interface ITuyaApiOptions {
     clientId: string,
@@ -23,7 +23,8 @@ export class TuyaApi {
     #clientId: string;
     #secret: string;
     #schema: string;
-    region: string;
+    #region: string;
+
     handleToken: boolean;
 
     tokenAccess: string;
@@ -36,14 +37,14 @@ export class TuyaApi {
 
     // static rwStaticLock = createReadWriteLock();
     // private requestLock = createReadWriteLock();
-    private tokenLock = createReadWriteLock();
+    private tokenLock = new Lock();
 
     protected constructor(options: ITuyaApiOptions) {
         this.#clientId = options.clientId;
         this.#secret = options.secret;
         this.#schema = options.schema;
+        this.#region = options.region ?? 'eu';
 
-        this.region = options.region ?? 'eu';
         this.handleToken = options.handleToken ?? true;
 
         this.tokenAccess = '';
@@ -60,27 +61,10 @@ export class TuyaApi {
         return this.instance;
     }
 
-    isNewCreds(options: ITuyaApiOptions) {
-        const oldCred = JSON.stringify({
-            clientId: this.#clientId,
-            secret: this.#secret,
-            schema: this.#schema,
-            region: this.region,
-        });
-        const newCred = JSON.stringify({
-            clientId: options.clientId,
-            secret: options.secret,
-            schema: options.schema,
-            region: options.region ?? 'eu',
-        });
-
-        return newCred !== oldCred;
-    }
-
     private buildClient() {
         this.#client = got.extend({
             responseType: 'json',
-            prefixUrl: `https://openapi.tuya${this.region}.com/v1.0/`,
+            prefixUrl: `https://openapi.tuya${this.#region}.com/v1.0/`,
             headers: {
                 client_id: this.#clientId,
                 sign_method: 'HMAC-SHA256',
@@ -126,49 +110,40 @@ export class TuyaApi {
     }
 
     private async buildHeaders(options: NormalizedOptions) {
-        const isTokenUrl = options?.url?.toString().includes('token');
-
-        if (!isTokenUrl) {
-            await this.readLock(this.tokenLock, async () => {
-                options.headers.access_token = this.tokenAccess;
-            });
-        }
-
         const timestamp = new Date().getTime();
         options.headers.t = timestamp.toString();
 
-        // Calculate signature
-        options.headers.sign = createHmac('sha256', this.#secret)
-            .update(`${this.#clientId}${(isTokenUrl ? '' : this.tokenAccess)}${timestamp}`)
-            .digest('hex')
-            .toUpperCase();
+        const isGetTokenUrl = options?.url?.toString().includes('token');
+        if (isGetTokenUrl) {
+            // Calculate signature
+            options.headers.sign = createHmac('sha256', this.#secret)
+                .update(`${this.#clientId}${timestamp}`)
+                .digest('hex')
+                .toUpperCase();
+        } else {
+            await this.tokenLock.readLock(async () => {
+                options.headers.access_token = this.tokenAccess;
+            });
+
+            // Calculate signature
+            options.headers.sign = createHmac('sha256', this.#secret)
+                .update(`${this.#clientId}${this.tokenAccess}${timestamp}`)
+                .digest('hex')
+                .toUpperCase();
+        }
     }
 
-    isTokenExpired() {
+    private isTokenExpired() {
         const _5min = 5 * 60 * 1000;
         return (new Date().getTime() + _5min) > this.tokenExpiresAt.getTime();
     }
 
-    setTokenObject(tokenAccess, tokenRefresh, tokenExpiresAt) {
-        this.tokenAccess = tokenAccess;
-        this.tokenRefresh = tokenRefresh;
-        this.tokenExpiresAt = new Date(tokenExpiresAt);
-    }
-
-    getTokenObject() {
-        return {
-            tokenAccess: this.tokenAccess,
-            tokenRefresh: this.tokenRefresh,
-            tokenExpiresAt: this.tokenExpiresAt.toISOString(),
-        }
-    }
-
     async getAndRefreshToken() {
-        if (this.tokenLock.isLocked === 'W') return;
+        if (this.tokenLock.lock.isLocked === 'W') return;
 
         // console.log('getAndRefreshToken');
 
-        return this.writeLock(this.tokenLock, async () => {
+        return this.tokenLock.writeLock(async () => {
             console.log('refresh token');
 
             let resp = await this.#client.get('token?grant_type=1').json<ITuyaApiResponse>();
@@ -181,29 +156,6 @@ export class TuyaApi {
         });
     }
 
-    private async readLock(lock: any, fn: (...args: any[]) => Promise<any>) {
-        return new Promise((resolve, reject) => {
-            lock.readLock(() => {
-                // console.log('Read Lock', lock.isLocked);
-                fn()
-                    .then((res) => resolve(res))
-                    .catch(reject)
-                    .finally(() => lock.unlock())
-            });
-        });
-    }
-
-    private async writeLock(lock: any, fn: (...args: any[]) => Promise<any>) {
-        return new Promise((resolve, reject) => {
-            lock.writeLock(() => {
-                // console.log('Write Lock', lock.isLocked);
-                fn()
-                    .then((res) => resolve(res))
-                    .catch(reject)
-                    .finally(() => lock.unlock())
-            });
-        });
-    }
 
     private setTokenData(response: ITuyaApiResponse) {
         const {result: {access_token, refresh_token, expire_time}} = response;
