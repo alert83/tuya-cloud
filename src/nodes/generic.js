@@ -38,11 +38,9 @@ module.exports = (RED) => {
     }
     function _onPulsarReady(node) {
         node.pulsarOnline = true;
-        node.status({ fill: 'green', shape: 'dot', text: 'online' });
     }
     function _onPulsarClosed(node) {
         node.pulsarOnline = false;
-        node.status({ fill: 'red', shape: 'ring', text: 'offline' });
     }
     function _onEvent(node, message) {
         let msg = Object.assign({}, message);
