@@ -6,6 +6,8 @@ export class Device {
     private error: any;
 
     constructor(gateway, node, config) {
+        console.log('new node');
+
         this.node = node;
         this.node.gateway = gateway;
         this.node.name = config.name;
