@@ -18,11 +18,11 @@
   "author": "",
   "license": "",
   "dependencies": {
-    "got": "^11.8.5",
+    "got": "^12.1.0",
     "locks": "^0.2.2",
     "lodash": "^4.17.21",
     "crypto-js": "^4.1.1",
-    "ws": "^7.5.8"
+    "ws": "^8.7.0"
   },
   "devDependencies": {
     "@types/lodash": "^4.14.182",
