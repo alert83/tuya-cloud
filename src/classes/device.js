@@ -15,6 +15,7 @@ class Device {
         this.node.deviceStatus = undefined;
         this.node.deviceOnline = false;
         if (this.node.gateway) {
+            this.pulsarOnline = this.node.gateway.pulsarReady;
             this.node.gateway.on('event', (message) => this._onEvent(message));
             this.node.gateway.on('pulsarReady', () => this._onPulsarReady());
             this.node.gateway.on('pulsarClosed', () => this._onPulsarClosed());
@@ -60,7 +61,6 @@ class Device {
         let data = msg.payload.data;
         let status = msg.payload.data.status;
         const deviceId = this.node.credentials.deviceId;
-        console.log('node:', msg);
         if (lodash_1.isEmpty(deviceId)) {
             this.node.send({ payload });
         }

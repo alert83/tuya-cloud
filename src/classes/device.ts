@@ -21,6 +21,8 @@ export class Device {
         this.node.deviceOnline = false;
 
         if (this.node.gateway) {
+            this.pulsarOnline = this.node.gateway.pulsarReady;
+
             this.node.gateway.on('event', (message) => this._onEvent(message));
             this.node.gateway.on('pulsarReady', () => this._onPulsarReady());
             this.node.gateway.on('pulsarClosed', () => this._onPulsarClosed());
@@ -81,7 +83,7 @@ export class Device {
 
         const deviceId = this.node.credentials.deviceId;
 
-        console.log('node:', msg);
+        // console.log('node:', msg);
 
         if (isEmpty(deviceId)) {
             this.node.send({payload});
