@@ -146,11 +146,11 @@ export class TuyaApi {
         return this.tokenLock.writeLock(async () => {
             console.log('refresh token');
 
-            let resp = await this.#client.get('token?grant_type=1').json<ITuyaApiResponse>();
+            let resp = await this.#client.get('v1.0/token?grant_type=1').json<ITuyaApiResponse>();
             this.setTokenData(resp);
 
             if (this.isTokenExpired()) {
-                resp = await this.#client.get(`token/${this.tokenRefresh}`).json<ITuyaApiResponse>();
+                resp = await this.#client.get(`v1.0/token/${this.tokenRefresh}`).json<ITuyaApiResponse>();
                 this.setTokenData(resp);
             }
         });
