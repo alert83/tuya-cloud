@@ -6,6 +6,9 @@ module.exports = (RED) => {
         RED.nodes.createNode(this, config);
         this.gateway = RED.nodes.getNode(config.config);
         this.name = config.name;
+        this.pulsarOnline = false;
+
+        const deviceId = this.credentials.deviceId;
 
         const node = this;
 
@@ -18,26 +21,42 @@ module.exports = (RED) => {
 
             node.on('input', (msg) => _onInput(node, msg));
             node.on('close', () => _onClose(node));
+
+            if (!isEmpty(deviceId)) {
+                node.status({fill: 'gray', shape: 'ring', text: 'connecting...'});
+                void node.gateway.sendCommand({url: `devices/${deviceId}`})
+                    .then((resp) => {
+                        const {result} = resp;
+                        node.status({fill: 'blue', shape: 'dot', text: `${result?.name}`});
+                    })
+                    .catch((err) => {
+                        node.status({fill: 'red', shape: 'ring', text: err.message});
+                    })
+                ;
+            }
         } else {
             node.status({fill: 'red', shape: 'ring', text: 'No gateway configured'});
         }
     }
 
-    function _onInput (node, msg) {
+    async function _onInput(node, msg) {
+        // msg.payload = await node.gateway.sendCommand(msg.payload);
     }
 
-    function _onClose (node) {
+    function _onClose(node) {
     }
 
-    function _onPulsarReady (node) {
+    function _onPulsarReady(node) {
+        node.pulsarOnline = true;
         node.status({fill: 'green', shape: 'dot', text: 'online'});
     }
 
-    function _onPulsarClosed (node) {
+    function _onPulsarClosed(node) {
+        node.pulsarOnline = false;
         node.status({fill: 'red', shape: 'ring', text: 'offline'});
     }
 
-    function _onEvent (node, message) {
+    function _onEvent(node, message) {
         let msg = Object.assign({}, message);
         let payload = msg.payload;
         let data = msg.payload.data;
