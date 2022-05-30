@@ -4,7 +4,9 @@ exports.Device = void 0;
 const lodash_1 = require("lodash");
 class Device {
     constructor(gateway, node, config) {
-        this._onInput = (msg) => {
+        this._onInput = async (msg) => {
+            msg.payload = await this.node.gateway.sendCommand(msg.payload);
+            this.node.send(msg);
             this.updateNodeStatus();
         };
         this._onClose = () => {

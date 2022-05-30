@@ -73,8 +73,10 @@ export class Device {
         this.updateNodeStatus();
     }
 
-    _onInput = (msg) => {
-        // msg.payload = await node.gateway.sendCommand(msg.payload);
+    _onInput = async (msg) => {
+        msg.payload = await this.node.gateway.sendCommand(msg.payload);
+        this.node.send(msg);
+
         this.updateNodeStatus();
     }
 
