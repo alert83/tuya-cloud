@@ -49,6 +49,7 @@ class Device {
         if (this.node.gateway) {
             this.pulsarOnline = this.node.gateway.pulsarReady;
             this.subscription = this.node.gateway.$event$
+                .asObservable()
                 .subscribe(({ e, v }) => {
                 switch (e) {
                     case 'pulsarReady':

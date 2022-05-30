@@ -14,8 +14,7 @@ module.exports = (RED) => {
         this.pulsarEnv = config.pulsarEnv;
         this.pulsarClient = null;
         this.pulsarReady = false;
-        const $event$ = new rxjs_1.Subject();
-        this.$event$ = $event$;
+        this.$event$ = new rxjs_1.Subject();
         const clientId = this.credentials.clientId;
         const secret = this.credentials.secret;
         const region = this.credentials.region;
@@ -58,7 +57,7 @@ module.exports = (RED) => {
             console.log('open');
             if (true !== node.pulsarReady) {
                 node.pulsarReady = true;
-                $event$.next({ e: 'pulsarReady' });
+                node.$event$.next({ e: 'pulsarReady' });
                 node.emit('pulsarReady');
             }
             node.status({ fill: "green", shape: "dot", text: 'open' });
@@ -66,7 +65,7 @@ module.exports = (RED) => {
         pulsarClient.message((ws, message) => {
             pulsarClient.ackMessage(message.messageId);
             console.log('message');
-            $event$.next({ e: 'event', v: message });
+            node.$event$.next({ e: 'event', v: message });
             node.emit('event', message);
             node.status({ fill: "blue", shape: "dot", text: 'message' });
         });
@@ -83,7 +82,7 @@ module.exports = (RED) => {
         pulsarClient.close((ws, ...args) => {
             console.log('close', ...args);
             node.pulsarReady = false;
-            $event$.next({ e: 'pulsarClosed' });
+            node.$event$.next({ e: 'pulsarClosed' });
             node.emit('pulsarClosed');
             node.log('tuya pulsar socket closed');
             node.status({ fill: "red", shape: "ring", text: 'close' });
@@ -91,7 +90,7 @@ module.exports = (RED) => {
         pulsarClient.error((ws, error) => {
             console.log('error', error);
             node.error(error);
-            $event$.next({ e: 'error', v: error });
+            node.$event$.next({ e: 'error', v: error });
             node.emit('error', error);
             node.status({ fill: "red", shape: "ring", text: 'error: ' + error });
         });
@@ -104,7 +103,7 @@ module.exports = (RED) => {
             }
             catch (e) {
                 node.error(e);
-                $event$.next({ e: 'error', v: e });
+                node.$event$.next({ e: 'error', v: e });
                 node.emit('error', e);
                 node.status({ fill: "red", shape: "ring", text: 'error: ' + e.message });
             }
