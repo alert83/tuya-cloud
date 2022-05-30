@@ -14,70 +14,70 @@
         // paletteLabel: "generic",
         // icon: "white-globe.png",
         label: function () {
-            return this.name || "Tuya Cloud API Generic";
+            return this.name || "tuya-generic";
         },
-        oneditprepare: function () {
-            var node = this;
-
-            var getDevs = function (conf) {
-
-                const confObj = RED.nodes.node(conf);
-
-                $('#node-input-deviceId').find('option').remove().end();
-                $('<option/>', {
-                    value: "",
-                    text: "Loading..."
-                }).appendTo('#node-input-deviceId');
-
-                console.log(111, confObj);
-
-                $.getJSON('smartthings/' + confObj.token + '/devices/button', function (data) {
-                    console.log("getDevs");
-                    console.log(data);
-
-                    $('#node-input-deviceId').find('option').remove().end();
-
-                    $('<option/>', {
-                        value: "",
-                        text: ""
-                    }).appendTo('#node-input-deviceId');
-
-                    for (d in data) {
-                        $('<option/>', {
-                            value: data[d].deviceId,
-                            text: data[d].label
-                        }).appendTo('#node-input-deviceId');
-                    }
-
-                    if (node.device) {
-                        $('#node-input-deviceId').val(node.device);
-                    }
-
-                });
-            };
-
-            if (node.config) {
-                getDevs(node.config);
-            }
-
-            $('#node-input-deviceId').change(function () {
-                var device = $('#node-input-deviceId option:selected');
-                if (device.get(0) && device.val() && device.val() !== "") {
-                    $('#node-input-name').val(device.text());
-                }
-            });
-
-            $('#node-input-config').change(function () {
-                var conf = $('#node-input-config').val();
-                console.log("conf changed: ", conf);
-                if (conf != '_ADD_') {
-                    getDevs(conf);
-                } else {
-                    $('#node-input-deviceId').find('option').remove().end();
-                    $('#node-input-deviceId').val("");
-                }
-            });
-        }
+        // oneditprepare: function () {
+        //     var node = this;
+        //
+        //     var getDevs = function (conf) {
+        //
+        //         const confObj = RED.nodes.node(conf);
+        //
+        //         $('#node-input-deviceId').find('option').remove().end();
+        //         $('<option/>', {
+        //             value: "",
+        //             text: "Loading..."
+        //         }).appendTo('#node-input-deviceId');
+        //
+        //         console.log(111, confObj);
+        //
+        //         $.getJSON('smartthings/' + confObj.token + '/devices/button', function (data) {
+        //             console.log("getDevs");
+        //             console.log(data);
+        //
+        //             $('#node-input-deviceId').find('option').remove().end();
+        //
+        //             $('<option/>', {
+        //                 value: "",
+        //                 text: ""
+        //             }).appendTo('#node-input-deviceId');
+        //
+        //             for (d in data) {
+        //                 $('<option/>', {
+        //                     value: data[d].deviceId,
+        //                     text: data[d].label
+        //                 }).appendTo('#node-input-deviceId');
+        //             }
+        //
+        //             if (node.device) {
+        //                 $('#node-input-deviceId').val(node.device);
+        //             }
+        //
+        //         });
+        //     };
+        //
+        //     if (node.config) {
+        //         getDevs(node.config);
+        //     }
+        //
+        //     $('#node-input-deviceId').change(function () {
+        //         var device = $('#node-input-deviceId option:selected');
+        //         if (device.get(0) && device.val() && device.val() !== "") {
+        //             $('#node-input-name').val(device.text());
+        //         }
+        //     });
+        //
+        //     $('#node-input-config').change(function () {
+        //         var conf = $('#node-input-config').val();
+        //         console.log("conf changed: ", conf);
+        //         if (conf != '_ADD_') {
+        //             getDevs(conf);
+        //         } else {
+        //             $('#node-input-deviceId').find('option').remove().end();
+        //             $('#node-input-deviceId').val("");
+        //         }
+        //     });
+        // }
     });
 </script>
 
@@ -94,10 +94,10 @@
 
   <div class="form-row">
     <label for="node-input-deviceId"><i class="icon-tag"></i> Device Id</label>
-<!--    <input type="text" id="node-input-deviceId" placeholder="Device Id"></input>-->
-    <select type="text" id="node-input-deviceId" style="display: inline-block; width: 70%;">
-        <option value="empty"></option>
-    </select>
+    <input type="text" id="node-input-deviceId" placeholder="Device Id"></input>
+<!--    <select type="text" id="node-input-deviceId" style="display: inline-block; width: 70%;">-->
+<!--        <option value="empty"></option>-->
+<!--    </select>-->
   </div>
 
 </script>

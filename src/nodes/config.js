@@ -13,15 +13,14 @@ module.exports = (RED) => {
         this.pulsarEnv = config.pulsarEnv;
         this.pulsarClient = null;
         this.pulsarReady = false;
+        this.devices = undefined;
         const clientId = this.credentials.clientId;
         const secret = this.credentials.secret;
-        const uid = this.credentials.uid;
         const region = this.credentials.region;
         const node = this;
         const httpClient = tuya_api_1.TuyaApi.getInstance({
             clientId: clientId,
             secret: secret,
-            uid: uid,
             region: region,
             handleToken: true,
         });
@@ -44,7 +43,14 @@ module.exports = (RED) => {
             }
         };
         node.getDevices = async () => {
-            return await node.httpClient.get('v1.0/iot-01/associated-users/devices?size=100');
+            var _a;
+            const { result } = await node.httpClient.get('v1.0/iot-01/associated-users/devices?size=100');
+            const devices = (_a = result.devices) !== null && _a !== void 0 ? _a : [];
+            return devices.map(d => ({
+                category: d.category,
+                id: d.id,
+                name: d.name,
+            }));
         };
         pulsarClient.open(() => {
             if (false === node.pulsarReady) {
@@ -98,7 +104,6 @@ module.exports = (RED) => {
         credentials: {
             clientId: { type: "text" },
             secret: { type: "password" },
-            uid: { type: "text" },
             region: { type: "text" },
         }
     });

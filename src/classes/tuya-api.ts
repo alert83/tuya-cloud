@@ -6,7 +6,7 @@ import {Lock} from "./lock";
 interface ITuyaApiOptions {
     clientId: string,
     secret: string,
-    uid: string,
+    // uid: string,
     region?: string,
     handleToken?: boolean,
 }
@@ -22,7 +22,7 @@ interface ITuyaApiResponse {
 export class TuyaApi {
     #clientId: string;
     #secret: string;
-    #uid: string;
+    // #uid: string;
     #region: string;
 
     handleToken: boolean;
@@ -42,7 +42,7 @@ export class TuyaApi {
     protected constructor(options: ITuyaApiOptions) {
         this.#clientId = options.clientId;
         this.#secret = options.secret;
-        this.#uid = options.uid;
+        // this.#uid = options.uid;
         this.#region = options.region ?? 'eu';
 
         this.handleToken = options.handleToken ?? true;

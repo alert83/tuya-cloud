@@ -9,10 +9,11 @@ module.exports = (RED) => {
         this.pulsarEnv = config.pulsarEnv;
         this.pulsarClient = null;
         this.pulsarReady = false;
+        this.devices = undefined;
 
         const clientId = this.credentials.clientId;
         const secret = this.credentials.secret;
-        const uid = this.credentials.uid;
+        // const uid = this.credentials.uid;
         const region = this.credentials.region;
 
         const node = this;
@@ -21,7 +22,7 @@ module.exports = (RED) => {
         const httpClient = TuyaApi.getInstance({
             clientId: clientId,
             secret: secret,
-            uid: uid,
+            // uid: uid,
             region: region,
             handleToken: true,
         });
@@ -49,7 +50,14 @@ module.exports = (RED) => {
 
         node.getDevices = async () => {
             // 'https://openapi.tuyaeu.com/v1.0/iot-01/associated-users/devices?size=100'
-            return await node.httpClient.get('v1.0/iot-01/associated-users/devices?size=100');
+            const {result} = await node.httpClient.get('v1.0/iot-01/associated-users/devices?size=100');
+            const devices = result.devices ?? [];
+
+            return devices.map(d => ({
+                category: d.category,
+                id: d.id,
+                name: d.name,
+            }));
         }
 
         pulsarClient.open(() => {
@@ -109,6 +117,8 @@ module.exports = (RED) => {
         pulsarClient.start();
         node.status({fill: "gray", shape: "dot", text: 'start...'});
 
+        // void node.getDevices().then(data => node.devices = data);
+
         node.on('close', () => {
             try {
                 node.pulsarClient.stop();
@@ -125,7 +135,7 @@ module.exports = (RED) => {
         credentials: {
             clientId: {type: "text"},
             secret: {type: "password"},
-            uid: {type: "text"},
+            // uid: {type: "text"},
             region: {type: "text"},
         }
     });

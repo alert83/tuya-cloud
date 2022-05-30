@@ -15,7 +15,7 @@ var __classPrivateFieldGet = (this && this.__classPrivateFieldGet) || function (
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
-var _clientId, _secret, _uid, _region, _client;
+var _clientId, _secret, _region, _client;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.TuyaApi = void 0;
 const got_1 = __importDefault(require("got"));
@@ -27,13 +27,11 @@ class TuyaApi {
         var _a, _b;
         _clientId.set(this, void 0);
         _secret.set(this, void 0);
-        _uid.set(this, void 0);
         _region.set(this, void 0);
         _client.set(this, void 0);
         this.tokenLock = new lock_1.Lock();
         __classPrivateFieldSet(this, _clientId, options.clientId);
         __classPrivateFieldSet(this, _secret, options.secret);
-        __classPrivateFieldSet(this, _uid, options.uid);
         __classPrivateFieldSet(this, _region, (_a = options.region) !== null && _a !== void 0 ? _a : 'eu');
         this.handleToken = (_b = options.handleToken) !== null && _b !== void 0 ? _b : true;
         this.tokenAccess = '';
@@ -137,7 +135,7 @@ class TuyaApi {
     }
 }
 exports.TuyaApi = TuyaApi;
-_clientId = new WeakMap(), _secret = new WeakMap(), _uid = new WeakMap(), _region = new WeakMap(), _client = new WeakMap();
+_clientId = new WeakMap(), _secret = new WeakMap(), _region = new WeakMap(), _client = new WeakMap();
 class TuyaApiError extends Error {
     constructor(code, message, timestamp) {
         super(message);
