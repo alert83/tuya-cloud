@@ -39,6 +39,8 @@ class TuyaMessageSubscribeWebsocket {
   private event: Event;
 
   constructor(config: IConfig) {
+    console.log('new Pulsar');
+
     this.config = Object.assign(
       {
         ackTimeoutMillis: 3000,
@@ -59,7 +61,11 @@ class TuyaMessageSubscribeWebsocket {
   }
 
   public stop() {
+    this.clearKeepAlive();
+
+    this.server?.removeAllListeners();
     this.server?.terminate();
+    this.server = undefined;
   }
 
   public open(cb: (ws: WebSocket) => void) {

@@ -75,6 +75,18 @@ module.exports = (RED) => {
             node.status({fill: "green", shape: "dot", text: 'open'});
         });
 
+        pulsarClient.reconnect(() => {
+            console.log('reconnect');
+
+            if (true !== node.pulsarReady) {
+                node.pulsarReady = true;
+                node.$event$.next({e: 'pulsarReady'});
+                node.emit('pulsarReady');
+            }
+
+            node.status({fill: "green", shape: "dot", text: 'reconnect'});
+        });
+
         pulsarClient.message((ws, message) => {
             pulsarClient.ackMessage(message.messageId);
             console.log('message');
@@ -84,11 +96,6 @@ module.exports = (RED) => {
             node.emit('event', message);
 
             node.status({fill: "blue", shape: "dot", text: 'message'});
-        });
-
-        pulsarClient.reconnect(() => {
-            console.log('reconnect');
-            node.status({fill: "green", shape: "dot", text: 'reconnect'});
         });
 
         pulsarClient.ping(() => {

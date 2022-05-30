@@ -20,6 +20,7 @@ const config_1 = require("./config");
 const utils_1 = require("./utils");
 class TuyaMessageSubscribeWebsocket {
     constructor(config) {
+        console.log('new Pulsar');
         this.config = Object.assign({
             ackTimeoutMillis: 3000,
             subscriptionType: 'Failover',
@@ -35,8 +36,11 @@ class TuyaMessageSubscribeWebsocket {
         this.server = this._connect();
     }
     stop() {
-        var _a;
-        (_a = this.server) === null || _a === void 0 ? void 0 : _a.terminate();
+        var _a, _b;
+        this.clearKeepAlive();
+        (_a = this.server) === null || _a === void 0 ? void 0 : _a.removeAllListeners();
+        (_b = this.server) === null || _b === void 0 ? void 0 : _b.terminate();
+        this.server = undefined;
     }
     open(cb) {
         this.event.on(TuyaMessageSubscribeWebsocket.open, cb);
