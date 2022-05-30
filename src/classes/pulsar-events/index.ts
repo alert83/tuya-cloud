@@ -46,7 +46,7 @@ class TuyaMessageSubscribeWebsocket {
         retryTimeout: 1000,
         maxRetryTimes: 100,
         timeout: 30000,
-        logger: noop, //console.log,
+        logger: console.log,
       },
       config,
     );
