@@ -74,8 +74,12 @@ export class Device {
     }
 
     _onInput = async (msg) => {
-        msg.payload = await this.node.gateway.sendCommand(msg.payload);
-        this.node.send(msg);
+        const {url, data} = msg?.payload;
+
+        if (!isEmpty(url)) {
+            msg.payload = await this.node.gateway.sendCommand(msg.payload);
+            this.node.send(msg);
+        }
 
         this.updateNodeStatus();
     }

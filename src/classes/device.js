@@ -5,8 +5,11 @@ const lodash_1 = require("lodash");
 class Device {
     constructor(gateway, node, config) {
         this._onInput = async (msg) => {
-            msg.payload = await this.node.gateway.sendCommand(msg.payload);
-            this.node.send(msg);
+            const { url, data } = msg === null || msg === void 0 ? void 0 : msg.payload;
+            if (!lodash_1.isEmpty(url)) {
+                msg.payload = await this.node.gateway.sendCommand(msg.payload);
+                this.node.send(msg);
+            }
             this.updateNodeStatus();
         };
         this._onClose = () => {
