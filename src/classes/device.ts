@@ -6,6 +6,8 @@ export class Device {
     private error: any;
 
     constructor(gateway, node, config) {
+        console.log('new node');
+
         this.node = node;
         this.node.gateway = gateway;
         this.node.name = config.name;
@@ -21,12 +23,12 @@ export class Device {
         if (this.node.gateway) {
             this.pulsarOnline = this.node.gateway.pulsarReady;
 
-            this.node.gateway.on('event', (message) => this._onEvent(message));
-            this.node.gateway.on('pulsarReady', () => this._onPulsarReady());
-            this.node.gateway.on('pulsarClosed', () => this._onPulsarClosed());
+            this.node.gateway.on('event', this._onEvent);
+            this.node.gateway.on('pulsarReady', this._onPulsarReady);
+            this.node.gateway.on('pulsarClosed', this._onPulsarClosed);
 
-            this.node.on('input', (msg) => this._onInput(msg));
-            this.node.on('close', () => this._onClose());
+            this.node.on('input', this._onInput);
+            this.node.on('close', this._onClose);
 
             if (!isEmpty(this.node.credentials.deviceId)) {
                 void this._getDetails()
@@ -50,30 +52,37 @@ export class Device {
         this._updateNodeStatus();
     }
 
-    _onInput(msg) {
+    _onInput = (msg) => {
         // msg.payload = await node.gateway.sendCommand(msg.payload);
         this._updateNodeStatus();
     }
 
-    _onClose() {
+    _onClose = () => {
+        this.node.gateway.off('event', this._onEvent);
+        this.node.gateway.off('pulsarReady', this._onPulsarReady);
+        this.node.gateway.off('pulsarClosed', this._onPulsarClosed);
+
+        this.node.off('input', this._onInput);
+        this.node.off('close', this._onClose);
+
         this._updateNodeStatus();
     }
 
-    _onPulsarReady() {
+    _onPulsarReady = () => {
         console.log('node: _onPulsarReady');
 
         this.pulsarOnline = true;
         this._updateNodeStatus();
     }
 
-    _onPulsarClosed() {
+    _onPulsarClosed = () => {
         console.log('node: _onPulsarClosed');
 
         this.pulsarOnline = false;
         this._updateNodeStatus();
     }
 
-    _onEvent(message) {
+    _onEvent = (message) => {
         let msg = Object.assign({}, message);
         let payload = msg.payload;
         let data = msg.payload.data;
@@ -108,7 +117,7 @@ export class Device {
     _updateNodeStatus() {
         //set node status
 
-        let text = [
+        const text = [
             this.node.deviceDetails?.name,
             ...(this.node.deviceStatus ?? []).map(s => s.code + ': ' + s.value)
         ];
