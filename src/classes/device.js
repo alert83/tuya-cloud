@@ -8,9 +8,8 @@ class Device {
             this.updateNodeStatus();
         };
         this._onClose = () => {
-            this.node.gateway.off('pulsarReady', this._onPulsarReady);
-            this.node.gateway.off('pulsarClosed', this._onPulsarClosed);
-            this.node.gateway.off('event', this._onEvent);
+            var _a;
+            (_a = this.subscription) === null || _a === void 0 ? void 0 : _a.unsubscribe();
             this.updateNodeStatus();
         };
         this._onPulsarReady = () => {
@@ -49,9 +48,23 @@ class Device {
         this.node.deviceOnline = false;
         if (this.node.gateway) {
             this.pulsarOnline = this.node.gateway.pulsarReady;
-            this.node.gateway.on('pulsarReady', this._onPulsarReady);
-            this.node.gateway.on('pulsarClosed', this._onPulsarClosed);
-            this.node.gateway.on('event', this._onEvent);
+            this.subscription = this.node.gateway.$event$
+                .subscribe(({ e, v }) => {
+                switch (e) {
+                    case 'pulsarReady':
+                        this._onPulsarReady();
+                        break;
+                    case 'pulsarClosed':
+                        this._onPulsarClosed();
+                        break;
+                    case 'event':
+                        this._onEvent(v);
+                        break;
+                    case 'error':
+                        this.node.error(v);
+                        break;
+                }
+            });
             this.node.on('input', this._onInput);
             this.node.on('close', this._onClose);
             if (!lodash_1.isEmpty(this.node.credentials.deviceId)) {

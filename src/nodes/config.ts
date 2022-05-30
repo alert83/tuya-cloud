@@ -1,4 +1,5 @@
 import {isEmpty} from "lodash";
+import {Subject} from "rxjs";
 import TuyaMessageSubscribeWebsocket from "../classes/pulsar-events";
 import {TuyaApi} from "../classes/tuya-api";
 
@@ -7,8 +8,12 @@ module.exports = (RED) => {
         RED.nodes.createNode(this, config);
         this.name = config.name;
         this.pulsarEnv = config.pulsarEnv;
+
         this.pulsarClient = null;
         this.pulsarReady = false;
+
+        const $event$ = new Subject<{e?,v?}>();
+        this.$event$ = $event$;
 
         const clientId = this.credentials.clientId;
         const secret = this.credentials.secret;
@@ -64,6 +69,7 @@ module.exports = (RED) => {
 
             if (true !== node.pulsarReady) {
                 node.pulsarReady = true;
+                $event$.next({e: 'pulsarReady'});
                 node.emit('pulsarReady');
             }
 
@@ -72,9 +78,10 @@ module.exports = (RED) => {
 
         pulsarClient.message((ws, message) => {
             pulsarClient.ackMessage(message.messageId);
-            // console.log('message');
+            console.log('message');
             // console.dir(message, {depth: 10});
 
+            $event$.next({e: 'event', v: message});
             node.emit('event', message);
 
             node.status({fill: "blue", shape: "dot", text: 'message'});
@@ -99,6 +106,7 @@ module.exports = (RED) => {
             console.log('close', ...args);
 
             node.pulsarReady = false;
+            $event$.next({e: 'pulsarClosed'});
             node.emit('pulsarClosed');
 
             node.log('tuya pulsar socket closed');
@@ -109,6 +117,7 @@ module.exports = (RED) => {
             console.log('error', error);
 
             node.error(error);
+            $event$.next({e: 'error', v: error});
             node.emit('error', error);
             node.status({fill: "red", shape: "ring", text: 'error: ' + error});
         });
@@ -124,6 +133,7 @@ module.exports = (RED) => {
                 node.status({fill: "gray", shape: "ring", text: 'stop...'});
             } catch (e) {
                 node.error(e);
+                $event$.next({e: 'error', v: e});
                 node.emit('error', e);
                 node.status({fill: "red", shape: "ring", text: 'error: ' + e.message});
             }

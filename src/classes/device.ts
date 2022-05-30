@@ -1,9 +1,11 @@
 import {isEmpty} from "lodash";
+import {Subject, Subscription} from "rxjs";
 
 export class Device {
     private node: any;
     private pulsarOnline: boolean;
     private error: any;
+    private subscription: Subscription;
 
     constructor(gateway, node, config) {
         console.log('new node');
@@ -23,9 +25,27 @@ export class Device {
         if (this.node.gateway) {
             this.pulsarOnline = this.node.gateway.pulsarReady;
 
-            this.node.gateway.on('pulsarReady', this._onPulsarReady);
-            this.node.gateway.on('pulsarClosed', this._onPulsarClosed);
-            this.node.gateway.on('event', this._onEvent);
+            this.subscription = (this.node.gateway.$event$ as Subject<{ e?, v? }>)
+                .subscribe(({e, v}) => {
+                    switch (e) {
+                        case 'pulsarReady':
+                            this._onPulsarReady();
+                            break;
+                        case 'pulsarClosed':
+                            this._onPulsarClosed();
+                            break;
+                        case 'event':
+                            this._onEvent(v)
+                            break;
+                        case 'error':
+                            this.node.error(v);
+                            break;
+                    }
+                });
+
+            // this.node.gateway.on('pulsarReady', this._onPulsarReady);
+            // this.node.gateway.on('pulsarClosed', this._onPulsarClosed);
+            // this.node.gateway.on('event', this._onEvent);
 
             this.node.on('input', this._onInput);
             this.node.on('close', this._onClose);
@@ -58,9 +78,11 @@ export class Device {
     }
 
     _onClose = () => {
-        this.node.gateway.off('pulsarReady', this._onPulsarReady);
-        this.node.gateway.off('pulsarClosed', this._onPulsarClosed);
-        this.node.gateway.off('event', this._onEvent);
+        this.subscription?.unsubscribe();
+
+        // this.node.gateway.off('pulsarReady', this._onPulsarReady);
+        // this.node.gateway.off('pulsarClosed', this._onPulsarClosed);
+        // this.node.gateway.off('event', this._onEvent);
 
         this.updateNodeStatus();
     }

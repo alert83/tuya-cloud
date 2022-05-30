@@ -4,6 +4,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const lodash_1 = require("lodash");
+const rxjs_1 = require("rxjs");
 const pulsar_events_1 = __importDefault(require("../classes/pulsar-events"));
 const tuya_api_1 = require("../classes/tuya-api");
 module.exports = (RED) => {
@@ -13,6 +14,8 @@ module.exports = (RED) => {
         this.pulsarEnv = config.pulsarEnv;
         this.pulsarClient = null;
         this.pulsarReady = false;
+        const $event$ = new rxjs_1.Subject();
+        this.$event$ = $event$;
         const clientId = this.credentials.clientId;
         const secret = this.credentials.secret;
         const region = this.credentials.region;
@@ -55,12 +58,15 @@ module.exports = (RED) => {
             console.log('open');
             if (true !== node.pulsarReady) {
                 node.pulsarReady = true;
+                $event$.next({ e: 'pulsarReady' });
                 node.emit('pulsarReady');
             }
             node.status({ fill: "green", shape: "dot", text: 'open' });
         });
         pulsarClient.message((ws, message) => {
             pulsarClient.ackMessage(message.messageId);
+            console.log('message');
+            $event$.next({ e: 'event', v: message });
             node.emit('event', message);
             node.status({ fill: "blue", shape: "dot", text: 'message' });
         });
@@ -77,6 +83,7 @@ module.exports = (RED) => {
         pulsarClient.close((ws, ...args) => {
             console.log('close', ...args);
             node.pulsarReady = false;
+            $event$.next({ e: 'pulsarClosed' });
             node.emit('pulsarClosed');
             node.log('tuya pulsar socket closed');
             node.status({ fill: "red", shape: "ring", text: 'close' });
@@ -84,6 +91,7 @@ module.exports = (RED) => {
         pulsarClient.error((ws, error) => {
             console.log('error', error);
             node.error(error);
+            $event$.next({ e: 'error', v: error });
             node.emit('error', error);
             node.status({ fill: "red", shape: "ring", text: 'error: ' + error });
         });
@@ -96,6 +104,7 @@ module.exports = (RED) => {
             }
             catch (e) {
                 node.error(e);
+                $event$.next({ e: 'error', v: e });
                 node.emit('error', e);
                 node.status({ fill: "red", shape: "ring", text: 'error: ' + e.message });
             }
