@@ -5,7 +5,11 @@ const lodash_1 = require("lodash");
 class Device {
     constructor(gateway, node, config) {
         this._onInput = async (msg) => {
-            const { url, data } = msg === null || msg === void 0 ? void 0 : msg.payload;
+            const { url, data, deviceId } = msg === null || msg === void 0 ? void 0 : msg.payload;
+            if (!lodash_1.isEmpty(deviceId)) {
+                this.deviceId = deviceId;
+                void this.getDetails().catch((err) => this.error = err);
+            }
             if (!lodash_1.isEmpty(url)) {
                 msg.payload = await this.node.gateway.sendCommand(msg.payload);
                 this.node.send(msg);
@@ -32,7 +36,7 @@ class Device {
             let payload = msg.payload;
             let data = msg.payload.data;
             let status = msg.payload.data.status;
-            const deviceId = this.node.credentials.deviceId;
+            const deviceId = this.deviceId;
             if (lodash_1.isEmpty(deviceId)) {
                 this.node.send({ payload });
             }
@@ -46,6 +50,7 @@ class Device {
         this.node.gateway = gateway;
         this.node.name = config.name;
         this.node.model = null;
+        this.deviceId = this.node.credentials.deviceId;
         this.pulsarOnline = false;
         this.error = undefined;
         this.node.deviceDetails = undefined;
@@ -73,22 +78,26 @@ class Device {
             });
             this.node.on('input', this._onInput);
             this.node.on('close', this._onClose);
-            if (!lodash_1.isEmpty(this.node.credentials.deviceId)) {
-                void this._getDetails()
-                    .catch((err) => this.error = err);
-            }
+            void this.getDetails().catch((err) => this.error = err);
             this.updateNodeStatus();
         }
         else {
             this.node.status({ fill: 'red', shape: 'ring', text: 'No gateway configured' });
         }
     }
-    async _getDetails() {
-        const resp = await this.node.gateway.sendCommand({ url: `v1.0/devices/${this.node.credentials.deviceId}` });
-        const { result } = resp;
-        this.node.deviceDetails = result;
-        this.node.deviceStatus = result.status;
-        this.node.deviceOnline = result.online;
+    async getDetails() {
+        if (lodash_1.isEmpty(this.deviceId)) {
+            this.node.deviceDetails = undefined;
+            this.node.deviceStatus = undefined;
+            this.node.deviceOnline = false;
+        }
+        else {
+            const resp = await this.node.gateway.sendCommand({ url: `v1.0/devices/${this.deviceId}` });
+            const { result } = resp;
+            this.node.deviceDetails = result;
+            this.node.deviceStatus = result.status;
+            this.node.deviceOnline = result.online;
+        }
         this.updateNodeStatus();
     }
     updateDeviceStatus(status) {

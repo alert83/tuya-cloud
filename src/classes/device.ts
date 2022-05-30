@@ -3,6 +3,7 @@ import {Subject, Subscription} from "rxjs";
 
 export class Device {
     private node: any;
+    private deviceId: string | undefined;
     private pulsarOnline: boolean;
     private error: any;
     private subscription: Subscription;
@@ -15,6 +16,7 @@ export class Device {
         this.node.name = config.name;
         this.node.model = null;
 
+        this.deviceId = this.node.credentials.deviceId;
         this.pulsarOnline = false;
         this.error = undefined;
 
@@ -51,10 +53,7 @@ export class Device {
             this.node.on('input', this._onInput);
             this.node.on('close', this._onClose);
 
-            if (!isEmpty(this.node.credentials.deviceId)) {
-                void this._getDetails()
-                    .catch((err) => this.error = err);
-            }
+            void this.getDetails().catch((err) => this.error = err);
 
             //set node status
             this.updateNodeStatus();
@@ -63,18 +62,13 @@ export class Device {
         }
     }
 
-    async _getDetails() {
-        const resp = await this.node.gateway.sendCommand({url: `v1.0/devices/${this.node.credentials.deviceId}`});
-        const {result} = resp;
-        this.node.deviceDetails = result;
-        this.node.deviceStatus = result.status;
-        this.node.deviceOnline = result.online;
-
-        this.updateNodeStatus();
-    }
-
     _onInput = async (msg) => {
-        const {url, data} = msg?.payload;
+        const {url, data, deviceId} = msg?.payload;
+
+        if (!isEmpty(deviceId)) {
+            this.deviceId = deviceId;
+            void this.getDetails().catch((err) => this.error = err);
+        }
 
         if (!isEmpty(url)) {
             msg.payload = await this.node.gateway.sendCommand(msg.payload);
@@ -114,7 +108,7 @@ export class Device {
         let data = msg.payload.data;
         let status = msg.payload.data.status;
 
-        const deviceId = this.node.credentials.deviceId;
+        const deviceId = this.deviceId;
 
         // console.log('node:', msg);
 
@@ -124,6 +118,22 @@ export class Device {
             this.updateDeviceStatus(status);
             this.node.send({payload});
         }
+    }
+
+    private async getDetails() {
+        if (isEmpty(this.deviceId)) {
+            this.node.deviceDetails = undefined;
+            this.node.deviceStatus = undefined;
+            this.node.deviceOnline = false;
+        } else {
+            const resp = await this.node.gateway.sendCommand({url: `v1.0/devices/${this.deviceId}`});
+            const {result} = resp;
+            this.node.deviceDetails = result;
+            this.node.deviceStatus = result.status;
+            this.node.deviceOnline = result.online;
+        }
+
+        this.updateNodeStatus();
     }
 
     private updateDeviceStatus(status: any[]) {
