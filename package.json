@@ -18,10 +18,11 @@
   "author": "",
   "license": "",
   "dependencies": {
+    "crypto-js": "^4.1.1",
     "got": "^11.8.5",
     "locks": "^0.2.2",
     "lodash": "^4.17.21",
-    "crypto-js": "^4.1.1",
+    "rxjs": "^7.5.5",
     "ws": "^7.5.8"
   },
   "devDependencies": {

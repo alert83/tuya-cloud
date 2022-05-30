@@ -23,9 +23,9 @@ export class Device {
         if (this.node.gateway) {
             this.pulsarOnline = this.node.gateway.pulsarReady;
 
-            this.node.gateway.on('event', this._onEvent);
             this.node.gateway.on('pulsarReady', this._onPulsarReady);
             this.node.gateway.on('pulsarClosed', this._onPulsarClosed);
+            this.node.gateway.on('event', this._onEvent);
 
             this.node.on('input', this._onInput);
             this.node.on('close', this._onClose);
@@ -36,7 +36,7 @@ export class Device {
             }
 
             //set node status
-            this._updateNodeStatus();
+            this.updateNodeStatus();
         } else {
             this.node.status({fill: 'red', shape: 'ring', text: 'No gateway configured'});
         }
@@ -49,37 +49,34 @@ export class Device {
         this.node.deviceStatus = result.status;
         this.node.deviceOnline = result.online;
 
-        this._updateNodeStatus();
+        this.updateNodeStatus();
     }
 
     _onInput = (msg) => {
         // msg.payload = await node.gateway.sendCommand(msg.payload);
-        this._updateNodeStatus();
+        this.updateNodeStatus();
     }
 
     _onClose = () => {
-        this.node.gateway.off('event', this._onEvent);
         this.node.gateway.off('pulsarReady', this._onPulsarReady);
         this.node.gateway.off('pulsarClosed', this._onPulsarClosed);
+        this.node.gateway.off('event', this._onEvent);
 
-        this.node.off('input', this._onInput);
-        this.node.off('close', this._onClose);
-
-        this._updateNodeStatus();
+        this.updateNodeStatus();
     }
 
     _onPulsarReady = () => {
         console.log('node: _onPulsarReady');
 
         this.pulsarOnline = true;
-        this._updateNodeStatus();
+        this.updateNodeStatus();
     }
 
     _onPulsarClosed = () => {
         console.log('node: _onPulsarClosed');
 
         this.pulsarOnline = false;
-        this._updateNodeStatus();
+        this.updateNodeStatus();
     }
 
     _onEvent = (message) => {
@@ -95,14 +92,12 @@ export class Device {
         if (isEmpty(deviceId)) {
             this.node.send({payload});
         } else if (data.devId === deviceId) {
-            this._updateDeviceStatus(status);
+            this.updateDeviceStatus(status);
             this.node.send({payload});
         }
-
-        this._updateNodeStatus();
     }
 
-    _updateDeviceStatus(status: any[]) {
+    private updateDeviceStatus(status: any[]) {
         (status ?? []).forEach(s => {
             const sIdx = (this.node.deviceStatus as any[]).findIndex(ds => ds.code === s.code);
 
@@ -112,9 +107,11 @@ export class Device {
                 this.node.deviceStatus = [...this.node.deviceStatus, s];
             }
         });
+
+        this.updateNodeStatus();
     }
 
-    _updateNodeStatus() {
+    private updateNodeStatus() {
         //set node status
 
         const text = [

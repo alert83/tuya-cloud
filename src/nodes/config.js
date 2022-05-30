@@ -13,7 +13,6 @@ module.exports = (RED) => {
         this.pulsarEnv = config.pulsarEnv;
         this.pulsarClient = null;
         this.pulsarReady = false;
-        this.devices = undefined;
         const clientId = this.credentials.clientId;
         const secret = this.credentials.secret;
         const region = this.credentials.region;
@@ -53,9 +52,10 @@ module.exports = (RED) => {
             }));
         };
         pulsarClient.open(() => {
-            if (false === node.pulsarReady) {
-                node.emit('pulsarReady');
+            console.log('open');
+            if (true !== node.pulsarReady) {
                 node.pulsarReady = true;
+                node.emit('pulsarReady');
             }
             node.status({ fill: "green", shape: "dot", text: 'open' });
         });
@@ -65,6 +65,7 @@ module.exports = (RED) => {
             node.status({ fill: "blue", shape: "dot", text: 'message' });
         });
         pulsarClient.reconnect(() => {
+            console.log('reconnect');
             node.status({ fill: "green", shape: "dot", text: 'reconnect' });
         });
         pulsarClient.ping(() => {
@@ -75,15 +76,15 @@ module.exports = (RED) => {
         });
         pulsarClient.close((ws, ...args) => {
             console.log('close', ...args);
-            node.emit('pulsarClosed');
             node.pulsarReady = false;
+            node.emit('pulsarClosed');
             node.log('tuya pulsar socket closed');
             node.status({ fill: "red", shape: "ring", text: 'close' });
         });
         pulsarClient.error((ws, error) => {
             console.log('error', error);
-            node.emit('error', error);
             node.error(error);
+            node.emit('error', error);
             node.status({ fill: "red", shape: "ring", text: 'error: ' + error });
         });
         pulsarClient.start();
@@ -94,8 +95,8 @@ module.exports = (RED) => {
                 node.status({ fill: "gray", shape: "ring", text: 'stop...' });
             }
             catch (e) {
-                node.emit('error', e);
                 node.error(e);
+                node.emit('error', e);
                 node.status({ fill: "red", shape: "ring", text: 'error: ' + e.message });
             }
         });

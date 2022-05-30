@@ -5,25 +5,23 @@ const lodash_1 = require("lodash");
 class Device {
     constructor(gateway, node, config) {
         this._onInput = (msg) => {
-            this._updateNodeStatus();
+            this.updateNodeStatus();
         };
         this._onClose = () => {
-            this.node.gateway.off('event', this._onEvent);
             this.node.gateway.off('pulsarReady', this._onPulsarReady);
             this.node.gateway.off('pulsarClosed', this._onPulsarClosed);
-            this.node.off('input', this._onInput);
-            this.node.off('close', this._onClose);
-            this._updateNodeStatus();
+            this.node.gateway.off('event', this._onEvent);
+            this.updateNodeStatus();
         };
         this._onPulsarReady = () => {
             console.log('node: _onPulsarReady');
             this.pulsarOnline = true;
-            this._updateNodeStatus();
+            this.updateNodeStatus();
         };
         this._onPulsarClosed = () => {
             console.log('node: _onPulsarClosed');
             this.pulsarOnline = false;
-            this._updateNodeStatus();
+            this.updateNodeStatus();
         };
         this._onEvent = (message) => {
             let msg = Object.assign({}, message);
@@ -35,10 +33,9 @@ class Device {
                 this.node.send({ payload });
             }
             else if (data.devId === deviceId) {
-                this._updateDeviceStatus(status);
+                this.updateDeviceStatus(status);
                 this.node.send({ payload });
             }
-            this._updateNodeStatus();
         };
         console.log('new node');
         this.node = node;
@@ -52,16 +49,16 @@ class Device {
         this.node.deviceOnline = false;
         if (this.node.gateway) {
             this.pulsarOnline = this.node.gateway.pulsarReady;
-            this.node.gateway.on('event', this._onEvent);
             this.node.gateway.on('pulsarReady', this._onPulsarReady);
             this.node.gateway.on('pulsarClosed', this._onPulsarClosed);
+            this.node.gateway.on('event', this._onEvent);
             this.node.on('input', this._onInput);
             this.node.on('close', this._onClose);
             if (!lodash_1.isEmpty(this.node.credentials.deviceId)) {
                 void this._getDetails()
                     .catch((err) => this.error = err);
             }
-            this._updateNodeStatus();
+            this.updateNodeStatus();
         }
         else {
             this.node.status({ fill: 'red', shape: 'ring', text: 'No gateway configured' });
@@ -73,9 +70,9 @@ class Device {
         this.node.deviceDetails = result;
         this.node.deviceStatus = result.status;
         this.node.deviceOnline = result.online;
-        this._updateNodeStatus();
+        this.updateNodeStatus();
     }
-    _updateDeviceStatus(status) {
+    updateDeviceStatus(status) {
         (status !== null && status !== void 0 ? status : []).forEach(s => {
             const sIdx = this.node.deviceStatus.findIndex(ds => ds.code === s.code);
             if (sIdx >= 0) {
@@ -85,8 +82,9 @@ class Device {
                 this.node.deviceStatus = [...this.node.deviceStatus, s];
             }
         });
+        this.updateNodeStatus();
     }
-    _updateNodeStatus() {
+    updateNodeStatus() {
         var _a, _b;
         const text = [
             (_a = this.node.deviceDetails) === null || _a === void 0 ? void 0 : _a.name,

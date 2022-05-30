@@ -9,12 +9,11 @@ module.exports = (RED) => {
         this.pulsarEnv = config.pulsarEnv;
         this.pulsarClient = null;
         this.pulsarReady = false;
-        this.devices = undefined;
 
         const clientId = this.credentials.clientId;
         const secret = this.credentials.secret;
-        // const uid = this.credentials.uid;
         const region = this.credentials.region;
+        // const uid = this.credentials.uid;
 
         const node = this;
 
@@ -22,8 +21,8 @@ module.exports = (RED) => {
         const httpClient = TuyaApi.getInstance({
             clientId: clientId,
             secret: secret,
-            // uid: uid,
             region: region,
+            // uid: uid,
             handleToken: true,
         });
         node.httpClient = httpClient;
@@ -61,11 +60,11 @@ module.exports = (RED) => {
         }
 
         pulsarClient.open(() => {
-            // console.log('open');
+            console.log('open');
 
-            if (false === node.pulsarReady) {
-                node.emit('pulsarReady');
+            if (true !== node.pulsarReady) {
                 node.pulsarReady = true;
+                node.emit('pulsarReady');
             }
 
             node.status({fill: "green", shape: "dot", text: 'open'});
@@ -82,7 +81,7 @@ module.exports = (RED) => {
         });
 
         pulsarClient.reconnect(() => {
-            // console.log('reconnect');
+            console.log('reconnect');
             node.status({fill: "green", shape: "dot", text: 'reconnect'});
         });
 
@@ -99,8 +98,8 @@ module.exports = (RED) => {
         pulsarClient.close((ws, ...args) => {
             console.log('close', ...args);
 
-            node.emit('pulsarClosed');
             node.pulsarReady = false;
+            node.emit('pulsarClosed');
 
             node.log('tuya pulsar socket closed');
             node.status({fill: "red", shape: "ring", text: 'close'});
@@ -109,8 +108,8 @@ module.exports = (RED) => {
         pulsarClient.error((ws, error) => {
             console.log('error', error);
 
-            node.emit('error', error);
             node.error(error);
+            node.emit('error', error);
             node.status({fill: "red", shape: "ring", text: 'error: ' + error});
         });
 
@@ -124,8 +123,8 @@ module.exports = (RED) => {
                 node.pulsarClient.stop();
                 node.status({fill: "gray", shape: "ring", text: 'stop...'});
             } catch (e) {
-                node.emit('error', e);
                 node.error(e);
+                node.emit('error', e);
                 node.status({fill: "red", shape: "ring", text: 'error: ' + e.message});
             }
         });
@@ -135,8 +134,8 @@ module.exports = (RED) => {
         credentials: {
             clientId: {type: "text"},
             secret: {type: "password"},
-            // uid: {type: "text"},
             region: {type: "text"},
+            // uid: {type: "text"},
         }
     });
 };
